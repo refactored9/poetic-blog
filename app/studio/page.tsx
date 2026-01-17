@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Blog } from "@/types/blog";
-import { getAllBlogs, deleteBlog, getVisitorStats } from "@/lib/api";
+import { getAllBlogs, deleteBlog, getVisitorStats, getTrafficSources, getTopPages, TrafficSource, TopPage } from "@/lib/api";
 import { useStudioAuth } from "./StudioAuth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
@@ -21,6 +21,8 @@ export default function StudioDashboard() {
   const { logout } = useStudioAuth();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [stats, setStats] = useState<Stats>({ subscribers: 0, unreadMessages: 0, journeys: 0, totalVisitors: 0, todayVisitors: 0 });
+  const [trafficSources, setTrafficSources] = useState<TrafficSource[]>([]);
+  const [topPages, setTopPages] = useState<TopPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,12 +39,17 @@ export default function StudioDashboard() {
       setBlogs(blogsData);
 
       // Load stats
-      const [subscribersRes, messagesRes, journeysRes, visitorStats] = await Promise.all([
+      const [subscribersRes, messagesRes, journeysRes, visitorStats, sources, pages] = await Promise.all([
         fetch(`${API_URL}/newsletter`).catch(() => null),
         fetch(`${API_URL}/contact?status=unread`).catch(() => null),
         fetch(`${API_URL}/journeys`).catch(() => null),
         getVisitorStats(),
+        getTrafficSources(),
+        getTopPages(),
       ]);
+
+      setTrafficSources(sources);
+      setTopPages(pages);
 
       const newStats: Stats = { subscribers: 0, unreadMessages: 0, journeys: 0, totalVisitors: visitorStats.totalVisitors, todayVisitors: visitorStats.todayVisitors };
 
@@ -241,6 +248,75 @@ export default function StudioDashboard() {
             </div>
           </Link>
         </div>
+
+        {/* Analytics Section */}
+        {(trafficSources.length > 0 || topPages.length > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
+            {/* Traffic Sources */}
+            {trafficSources.length > 0 && (
+              <div className="card p-4 md:p-6">
+                <h3 className="text-lg font-serif mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  Traffic Sources
+                </h3>
+                <div className="space-y-3">
+                  {trafficSources.slice(0, 5).map((source, index) => {
+                    const maxCount = trafficSources[0]?.count || 1;
+                    const percentage = (source.count / maxCount) * 100;
+                    return (
+                      <div key={source.source || index}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="capitalize">{source.source || 'unknown'}</span>
+                          <span className="text-[var(--muted)]">{source.count}</span>
+                        </div>
+                        <div className="h-2 bg-[var(--background-alt)] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[var(--accent)] rounded-full transition-all"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Top Pages */}
+            {topPages.length > 0 && (
+              <div className="card p-4 md:p-6">
+                <h3 className="text-lg font-serif mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Top Pages
+                </h3>
+                <div className="space-y-3">
+                  {topPages.slice(0, 5).map((page, index) => {
+                    const maxCount = topPages[0]?.count || 1;
+                    const percentage = (page.count / maxCount) * 100;
+                    return (
+                      <div key={page.page || index}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="truncate max-w-[200px]">{page.page === '/' ? 'Home' : page.page}</span>
+                          <span className="text-[var(--muted)]">{page.count}</span>
+                        </div>
+                        <div className="h-2 bg-[var(--background-alt)] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[var(--success)] rounded-full transition-all"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Blog Posts */}
         <div className="mb-6">

@@ -206,3 +206,37 @@ export async function getVisitorStats(): Promise<VisitorStats> {
     return { totalVisitors: 0, todayVisitors: 0, uniqueVisitors: 0 };
   }
 }
+
+export interface TrafficSource {
+  source: string;
+  count: number;
+}
+
+export async function getTrafficSources(): Promise<TrafficSource[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/analytics/sources`);
+    if (!response.ok) {
+      return [];
+    }
+    return response.json();
+  } catch {
+    return [];
+  }
+}
+
+export interface TopPage {
+  page: string;
+  count: number;
+}
+
+export async function getTopPages(): Promise<TopPage[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/analytics/pages`);
+    if (!response.ok) {
+      return [];
+    }
+    return response.json();
+  } catch {
+    return [];
+  }
+}
