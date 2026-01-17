@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Blog } from "@/types/blog";
-import { getAllBlogs, deleteBlog } from "@/lib/api";
+import { getAllBlogs, deleteBlog, getVisitorStats } from "@/lib/api";
 import { useStudioAuth } from "./StudioAuth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
@@ -13,12 +13,14 @@ interface Stats {
   subscribers: number;
   unreadMessages: number;
   journeys: number;
+  totalVisitors: number;
+  todayVisitors: number;
 }
 
 export default function StudioDashboard() {
   const { logout } = useStudioAuth();
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [stats, setStats] = useState<Stats>({ subscribers: 0, unreadMessages: 0, journeys: 0 });
+  const [stats, setStats] = useState<Stats>({ subscribers: 0, unreadMessages: 0, journeys: 0, totalVisitors: 0, todayVisitors: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,13 +37,14 @@ export default function StudioDashboard() {
       setBlogs(blogsData);
 
       // Load stats
-      const [subscribersRes, messagesRes, journeysRes] = await Promise.all([
+      const [subscribersRes, messagesRes, journeysRes, visitorStats] = await Promise.all([
         fetch(`${API_URL}/newsletter`).catch(() => null),
         fetch(`${API_URL}/contact?status=unread`).catch(() => null),
         fetch(`${API_URL}/journeys`).catch(() => null),
+        getVisitorStats(),
       ]);
 
-      const newStats: Stats = { subscribers: 0, unreadMessages: 0, journeys: 0 };
+      const newStats: Stats = { subscribers: 0, unreadMessages: 0, journeys: 0, totalVisitors: visitorStats.totalVisitors, todayVisitors: visitorStats.todayVisitors };
 
       if (subscribersRes?.ok) {
         const data = await subscribersRes.json();
@@ -120,7 +123,26 @@ export default function StudioDashboard() {
           </div>
 
           {/* Quick Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4 mt-8">
+            <div className="card p-3 md:p-4 bg-gradient-to-br from-[var(--accent)]/5 to-transparent">
+              <div className="flex items-center gap-2 mb-1">
+                <svg className="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <p className="text-xs text-[var(--muted)]">Total Visitors</p>
+              </div>
+              <p className="text-xl md:text-2xl font-serif text-[var(--accent)]">{stats.totalVisitors.toLocaleString()}</p>
+            </div>
+            <div className="card p-3 md:p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <svg className="w-4 h-4 text-[var(--success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                <p className="text-xs text-[var(--muted)]">Today</p>
+              </div>
+              <p className="text-xl md:text-2xl font-serif text-[var(--success)]">{stats.todayVisitors.toLocaleString()}</p>
+            </div>
             <div className="card p-3 md:p-4">
               <p className="text-xl md:text-2xl font-serif text-[var(--accent)]">{publishedCount}</p>
               <p className="text-xs md:text-sm text-[var(--muted)]">Published</p>

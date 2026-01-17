@@ -162,3 +162,47 @@ export async function subscribeNewsletter(email: string): Promise<{ message: str
     body: JSON.stringify({ email }),
   });
 }
+
+// Visitor Analytics
+export interface VisitorStats {
+  totalVisitors: number;
+  todayVisitors: number;
+  uniqueVisitors: number;
+}
+
+export async function recordVisit(
+  page: string,
+  source?: string,
+  medium?: string,
+  campaign?: string
+): Promise<void> {
+  try {
+    await fetch(`${API_BASE_URL}/analytics/visit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        page,
+        source: source || 'direct',
+        medium,
+        campaign,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  } catch {
+    // Silently fail - don't break the page if analytics fails
+  }
+}
+
+export async function getVisitorStats(): Promise<VisitorStats> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/analytics/visitors`);
+    if (!response.ok) {
+      return { totalVisitors: 0, todayVisitors: 0, uniqueVisitors: 0 };
+    }
+    return response.json();
+  } catch {
+    return { totalVisitors: 0, todayVisitors: 0, uniqueVisitors: 0 };
+  }
+}
