@@ -686,3 +686,203 @@ button img,
     display: none !important;
   }
 }
+
+/* ==========================================
+   Journey Gallery Styles
+   ========================================== */
+
+/* Journey image card animations */
+.journey-image-card {
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.journey-image-card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+/* Journey section fade-in animation */
+.journey-section {
+  animation: journeyFadeIn 0.8s ease forwards;
+}
+
+@keyframes journeyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered animation for journey sections */
+.journey-section:nth-child(1) { animation-delay: 0s; }
+.journey-section:nth-child(2) { animation-delay: 0.15s; }
+.journey-section:nth-child(3) { animation-delay: 0.3s; }
+.journey-section:nth-child(4) { animation-delay: 0.45s; }
+.journey-section:nth-child(5) { animation-delay: 0.6s; }
+
+/* Lightbox overlay animation */
+.lightbox-overlay {
+  animation: lightboxFadeIn 0.3s ease forwards;
+}
+
+@keyframes lightboxFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Watermark styling */
+.watermark-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Image fade-in on load */
+@keyframes imageFadeIn {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.image-loaded {
+  animation: imageFadeIn 0.5s ease forwards;
+}
+
+/* Hero section decorative elements */
+.hero-pattern {
+  background-image:
+    radial-gradient(circle at 25% 25%, var(--accent-light) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, var(--accent-light) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0.1;
+}
+
+/* Smooth scroll for gallery navigation */
+.gallery-scroll {
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+}
+
+.gallery-scroll > * {
+  scroll-snap-align: center;
+}
+
+/* Image grid hover effects */
+.image-grid-item {
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.image-grid-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+/* Caption reveal animation */
+@keyframes captionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.caption-reveal {
+  animation: captionReveal 0.4s ease forwards;
+}
+
+/* Decorative separator */
+.journey-separator {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent-light) 20%,
+    var(--accent) 50%,
+    var(--accent-light) 80%,
+    transparent
+  );
+  margin: 4rem 0;
+}
+
+/* Photo count badge pulse */
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.photo-badge:hover {
+  animation: badgePulse 1s ease infinite;
+}
+
+/* Keyboard hint styling */
+kbd {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Loading skeleton base */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--background-alt) 0%,
+    var(--border-light) 50%,
+    var(--background-alt) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Smooth image reveal */
+.image-reveal {
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.image-reveal.loaded {
+  opacity: 1;
+  transform: scale(1);
+}

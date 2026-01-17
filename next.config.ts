@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
         hostname: "localhost",
       },
     ],
+    qualities: [60, 70, 75, 85],
   },
 };
 
