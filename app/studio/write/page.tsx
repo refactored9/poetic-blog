@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { BlogFormData, PlaceImage } from "@/types/blog";
-import { createBlog, updateBlog, getBlogBySlug, uploadImage } from "@/lib/api";
+import { createBlog, updateBlog, getBlogById, getAllBlogs, uploadImage } from "@/lib/api";
 import RichTextEditor from "@/components/RichTextEditor";
 
 function WriteForm() {
@@ -33,7 +33,19 @@ function WriteForm() {
   async function loadBlog(id: string) {
     try {
       setLoading(true);
-      const blog = await getBlogBySlug(id);
+      let blog;
+
+      try {
+        blog = await getBlogById(id);
+      } catch {
+        // Fallback: fetch all blogs and find by id
+        const allBlogs = await getAllBlogs();
+        blog = allBlogs.find((b) => b.id === id || b._id === id);
+        if (!blog) {
+          throw new Error("Blog not found");
+        }
+      }
+
       setTitle(blog.title);
       setExcerpt(blog.excerpt);
       setCoverImage(blog.coverImage || "");

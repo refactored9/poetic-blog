@@ -43,6 +43,11 @@ export async function getBlogBySlug(slug: string): Promise<Blog> {
   return response.data;
 }
 
+export async function getBlogById(id: string): Promise<Blog> {
+  const response = await fetchApi<{ data: Blog }>(`/blogs/${id}`);
+  return response.data;
+}
+
 export async function createBlog(data: BlogFormData): Promise<Blog> {
   return fetchApi<Blog>('/blogs', {
     method: 'POST',

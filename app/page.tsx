@@ -29,12 +29,12 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Welcome Header */}
-      <section className="pt-8 pb-4 md:pt-16 md:pb-8">
+      <section className="pt-6 pb-3 md:pt-10 md:pb-5">
         <div className="wide-width max-w-3xl">
-          <p className="text-xs md:text-sm tracking-widest text-[var(--muted)] uppercase mb-1.5 md:mb-2">
+          <p className="text-xs md:text-sm tracking-widest text-[var(--muted)] uppercase mb-1 md:mb-1.5">
             A Journal
           </p>
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-serif leading-[1.15] mb-2 md:mb-3">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-serif leading-[1.15] mb-1.5 md:mb-2">
             Where words wander<br />
             <span className="text-[var(--muted)]">and find their way home</span>
           </h1>
@@ -46,11 +46,11 @@ export default async function HomePage() {
 
       {/* Featured Story - Large Hero */}
       {featuredBlog ? (
-        <section className="py-6 md:py-12">
+        <section className="py-4 md:py-6">
           <div className="wide-width">
             <Link href={`/blog/${featuredBlog.slug}`} className="group block">
               {/* Large Image */}
-              <div className="relative aspect-[16/10] md:aspect-[21/9] rounded-xl md:rounded-2xl overflow-hidden bg-[var(--background-alt)] mb-6 md:mb-8">
+              <div className="relative aspect-[4/3] md:aspect-[16/9] rounded-xl md:rounded-2xl overflow-hidden bg-[var(--background-alt)]">
                 {featuredBlog.coverImage ? (
                   <Image
                     src={featuredBlog.coverImage}
@@ -67,13 +67,13 @@ export default async function HomePage() {
                     </span>
                   </div>
                 )}
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                {/* Overlay gradient - stronger for better text visibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
                 {/* Content overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-10">
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8" style={{ color: 'white' }}>
                   <div className="max-w-3xl">
-                    <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-white/90 mb-2 md:mb-3">
+                    <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm mb-1.5 md:mb-2" style={{ color: 'rgba(255,255,255,0.9)' }}>
                       {featuredBlog.tags && featuredBlog.tags[0] && (
                         <>
                           <span className="px-2 md:px-3 py-0.5 md:py-1 bg-white/25 backdrop-blur-sm rounded-full text-[10px] md:text-xs">
@@ -89,10 +89,10 @@ export default async function HomePage() {
                         })}
                       </span>
                     </div>
-                    <h1 className="text-lg md:text-4xl lg:text-5xl font-serif text-white mb-1 md:mb-3 leading-tight group-hover:text-white/95 transition-colors">
+                    <h2 className="text-lg md:text-3xl lg:text-4xl font-serif mb-1 md:mb-2 leading-tight" style={{ color: 'white' }}>
                       {featuredBlog.title}
-                    </h1>
-                    <p className="text-white/90 text-sm md:text-lg leading-relaxed line-clamp-2 hidden md:block">
+                    </h2>
+                    <p className="text-xs md:text-base leading-relaxed line-clamp-2 md:line-clamp-3" style={{ color: 'rgba(255,255,255,0.9)' }}>
                       {featuredBlog.excerpt}
                     </p>
                   </div>
@@ -102,9 +102,9 @@ export default async function HomePage() {
           </div>
         </section>
       ) : (
-        <section className="py-16">
+        <section className="py-10">
           <div className="wide-width text-center">
-            <p className="text-[var(--muted)] font-serif italic mb-6">
+            <p className="text-[var(--muted)] font-serif italic mb-4">
               The pages await their words.
             </p>
             <Link
@@ -119,16 +119,16 @@ export default async function HomePage() {
 
       {/* Recent Stories Grid */}
       {recentBlogs.length > 0 && (
-        <section className="py-8 md:py-16">
+        <section className="py-6 md:py-10">
           <div className="wide-width">
-            <div className="flex items-center justify-between mb-6 md:mb-10">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
               <h2 className="text-xs md:text-sm font-medium tracking-wide uppercase text-[var(--muted)]">
                 Recent Writings
               </h2>
               <span className="text-xs md:text-sm text-[var(--muted)]">{blogs.length} stories</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
               {recentBlogs.map((blog) => (
                 <Link
                   key={blog.id}
@@ -136,7 +136,7 @@ export default async function HomePage() {
                   className="group block"
                 >
                   {/* Image */}
-                  <div className="relative aspect-[4/3] rounded-lg md:rounded-xl overflow-hidden bg-[var(--background-alt)] mb-3 md:mb-4">
+                  <div className="relative aspect-[4/3] rounded-lg md:rounded-xl overflow-hidden bg-[var(--background-alt)] mb-2 md:mb-3">
                     {blog.coverImage ? (
                       <Image
                         src={blog.coverImage}
@@ -185,9 +185,9 @@ export default async function HomePage() {
       )}
 
       {/* Quick Links */}
-      <section className="py-8 md:py-16 border-t border-[var(--border)]">
+      <section className="py-6 md:py-10 border-t border-[var(--border)]">
         <div className="wide-width">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
             <Link
               href="/about"
               className="group flex items-center gap-3 md:gap-4 p-3 md:p-5 rounded-lg md:rounded-xl border border-[var(--border)] hover:border-[var(--foreground)] transition-colors"

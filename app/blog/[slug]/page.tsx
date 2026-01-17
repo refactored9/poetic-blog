@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Blog } from "@/types/blog";
 import ShareButton from "./ShareButton";
 import ReadingProgress from "./ReadingProgress";
+import ImageGallery from "@/components/ImageGallery";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -353,7 +354,7 @@ export default async function BlogPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Place Images Gallery */}
+        {/* Place Images Gallery - Pinterest Style with Lightbox */}
         {blog.placeImages && blog.placeImages.length > 0 && (
           <section className="py-12 md:py-20 bg-[var(--background-alt)]">
             <div className="wide-width">
@@ -364,57 +365,7 @@ export default async function BlogPage({ params }: PageProps) {
                 <h2 className="text-2xl md:text-4xl font-serif">Places Along the Way</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                {blog.placeImages.map((image, index) => (
-                  <figure
-                    key={image.id}
-                    className={`group relative overflow-hidden rounded-xl md:rounded-2xl ${
-                      index === 0 && blog.placeImages.length > 2 ? "md:col-span-2" : ""
-                    }`}
-                  >
-                    <div
-                      className={`relative ${
-                        index === 0 && blog.placeImages.length > 2
-                          ? "aspect-[21/9]"
-                          : "aspect-[4/3]"
-                      }`}
-                    >
-                      <Image
-                        src={image.url}
-                        alt={image.alt}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                      {/* Caption on hover */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                        {image.caption && (
-                          <p className="text-white text-sm md:text-base font-medium">{image.caption}</p>
-                        )}
-                        {image.location && (
-                          <p className="text-white/70 text-xs md:text-sm mt-1 flex items-center gap-1">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            </svg>
-                            {image.location}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Mobile caption */}
-                    {image.caption && (
-                      <figcaption className="mt-3 text-sm text-[var(--muted)] md:hidden">
-                        {image.caption}
-                        {image.location && (
-                          <span className="block text-xs mt-0.5">{image.location}</span>
-                        )}
-                      </figcaption>
-                    )}
-                  </figure>
-                ))}
-              </div>
+              <ImageGallery images={blog.placeImages} />
             </div>
           </section>
         )}
