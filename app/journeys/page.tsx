@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Journey } from "@/types/blog";
 import JourneyGallery from "@/components/JourneyGallery";
 import JourneyCoverImage from "@/components/JourneyCoverImage";
+import ShareButton from "@/components/ShareButton";
 
 export const metadata: Metadata = {
   title: "Journeys | Visual Stories",
@@ -80,12 +81,19 @@ function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
             </p>
           )}
 
-          {/* Decorative line */}
-          <div className="mt-6 md:mt-8 flex items-center gap-3">
-            <div className="w-12 md:w-16 h-px bg-[var(--accent)]" />
-            <span className="text-[var(--accent)] text-xs md:text-sm font-medium tracking-widest uppercase">
-              {journey.images.length} Moments
-            </span>
+          {/* Decorative line & Share */}
+          <div className="mt-6 md:mt-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 md:w-16 h-px bg-[var(--accent)]" />
+              <span className="text-[var(--accent)] text-xs md:text-sm font-medium tracking-widest uppercase">
+                {journey.images.length} Moments
+              </span>
+            </div>
+            <ShareButton
+              url={`/journeys#${journey.id}`}
+              title={journey.title}
+              description={journey.description}
+            />
           </div>
         </div>
       </div>
