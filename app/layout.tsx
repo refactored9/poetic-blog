@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContentProtection from "@/components/ContentProtection";
 import VisitorTracker from "@/components/VisitorTracker";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ToastProvider } from "@/components/ToastProvider";
+import BackToTop from "@/components/BackToTop";
+import KeyboardShortcuts from "@/components/KeyboardShortcuts";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import StarField from "@/components/StarField";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -24,7 +31,7 @@ export const metadata: Metadata = {
     template: "%s | The Solo Akash",
   },
   description: "A quiet corner for thoughts, places, and poetry. Stories told through words and wanderings.",
-  keywords: ["blog", "poetry", "travel", "places", "thoughts", "writing"],
+  keywords: ["blog", "poetry", "travel", "places", "thoughts", "writing", "solo travel", "adventure", "photography"],
   authors: [{ name: "Akash" }],
   creator: "Akash",
   openGraph: {
@@ -60,6 +67,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com"),
 };
 
@@ -69,15 +81,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${sourceSans.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${sourceSans.variable}`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col antialiased">
-        <ContentProtection />
-        <VisitorTracker />
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <ThemeProvider>
+          <StarField />
+          <ToastProvider>
+            {/* Skip to content link for accessibility */}
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[var(--foreground)] focus:text-[var(--background)] focus:rounded-lg focus:outline-none"
+            >
+              Skip to content
+            </a>
+            <ContentProtection />
+            <VisitorTracker />
+            <Header />
+            <main id="main-content" className="flex-1 animate-page-in" tabIndex={-1}>
+              {children}
+            </main>
+            <Footer />
+            <BackToTop />
+            <KeyboardShortcuts />
+            <ServiceWorkerRegistration />
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

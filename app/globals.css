@@ -1,28 +1,60 @@
 @import "tailwindcss";
 
-:root {
-  /* Refined modern palette - elegant and calming */
-  --background: #fdfcfb;
-  --background-alt: #f7f5f3;
-  --background-card: #ffffff;
-  --foreground: #18181b;
-  --foreground-soft: #3f3f46;
-  --accent: #7c6a5c;
-  --accent-light: #a39282;
-  --accent-dark: #5c4f44;
-  --muted: #71717a;
-  --muted-soft: #a1a1aa;
-  --border: #e4e4e7;
-  --border-light: #f4f4f5;
+:root,
+.light {
+  /* Morning Mist palette — soft dawn light */
+  --background: #f5f0eb;
+  --background-alt: #ede7e0;
+  --background-card: #faf7f4;
+  --background-section: #ede7e0;
+  --foreground: #1a1612;
+  --foreground-soft: #3d3630;
+  --accent: #9a7356;
+  --accent-light: #b8956f;
+  --accent-dark: #7a5a42;
+  --muted: #6b6360;
+  --muted-soft: #9e9692;
+  --border: #d6cfc7;
+  --border-light: #e8e2db;
   --success: #16a34a;
   --error: #dc2626;
 
-  /* Refined shadows */
+  /* Soft earthen shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 10px 15px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.06), 0 20px 40px rgba(0, 0, 0, 0.06);
   --shadow-hover: 0 14px 28px rgba(0, 0, 0, 0.08), 0 10px 10px rgba(0, 0, 0, 0.04);
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+
+  --header-bg: rgba(245, 240, 235, 0.8);
+}
+
+.dark {
+  /* Midnight Wanderer palette — cosmic navy with campfire amber */
+  --background: #0a0e1a;
+  --background-alt: #0f1424;
+  --background-card: #131830;
+  --background-section: #0f1424;
+  --foreground: #e8e4df;
+  --foreground-soft: #c4bfb8;
+  --accent: #c9956b;
+  --accent-light: #dbb08a;
+  --accent-dark: #a87a52;
+  --muted: #8a8490;
+  --muted-soft: #5c5768;
+  --border: #1e293b;
+  --border-light: #172033;
+  --success: #22c55e;
+  --error: #ef4444;
+
+  /* Deep night shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 20px 40px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 14px 28px rgba(0, 0, 0, 0.5), 0 10px 10px rgba(0, 0, 0, 0.3);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  --header-bg: rgba(10, 14, 26, 0.85);
 }
 
 @theme inline {
@@ -47,8 +79,12 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
-  line-height: 1.7;
+  line-height: 1.8;
   letter-spacing: -0.01em;
+}
+
+.dark body {
+  background: linear-gradient(180deg, #0a0e1a 0%, #0d1225 50%, #0a0e1a 100%);
 }
 
 /* Typography */
@@ -56,7 +92,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif), Georgia, serif;
   font-weight: 500;
   line-height: 1.25;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
 }
 
 .font-serif {
@@ -112,13 +148,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .prose blockquote {
   border-left: 3px solid var(--accent);
-  padding: 0.875rem 0 0.875rem 1.25rem;
-  margin: 2rem 0;
+  padding: 1.25rem 1.5rem;
+  margin: 2.5rem 0;
   font-style: italic;
   color: var(--muted);
   font-family: var(--font-serif), Georgia, serif;
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   background: linear-gradient(90deg, var(--background-alt), transparent);
+  border-radius: 0 8px 8px 0;
 }
 
 .prose img {
@@ -145,6 +182,11 @@ h1, h2, h3, h4, h5, h6 {
 ::selection {
   background: var(--accent);
   color: white;
+}
+
+.dark ::selection {
+  background: #c9956b;
+  color: #0a0e1a;
 }
 
 /* Form elements */
@@ -193,27 +235,48 @@ input, textarea {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease forwards;
+  animation: fadeIn 0.6s ease forwards;
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.5s ease forwards;
+  animation: fadeInUp 0.8s ease forwards;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.35s ease forwards;
+  animation: scaleIn 0.5s ease forwards;
 }
 
 .animate-pulse {
   animation: pulse 2s ease-in-out infinite;
 }
 
-/* Stagger animations */
-.stagger-1 { animation-delay: 0.08s; opacity: 0; }
-.stagger-2 { animation-delay: 0.16s; opacity: 0; }
-.stagger-3 { animation-delay: 0.24s; opacity: 0; }
-.stagger-4 { animation-delay: 0.32s; opacity: 0; }
-.stagger-5 { animation-delay: 0.4s; opacity: 0; }
+/* Stagger animations — slower, more contemplative */
+.stagger-1 { animation-delay: 0.12s; opacity: 0; }
+.stagger-2 { animation-delay: 0.24s; opacity: 0; }
+.stagger-3 { animation-delay: 0.36s; opacity: 0; }
+.stagger-4 { animation-delay: 0.48s; opacity: 0; }
+.stagger-5 { animation-delay: 0.6s; opacity: 0; }
+
+/* Contemplative animations */
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes slowFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* Image hover effects */
 .image-hover {
@@ -225,7 +288,7 @@ input, textarea {
 }
 
 .image-hover:hover img {
-  transform: scale(1.04);
+  transform: scale(1.02);
 }
 
 /* Card styles */
@@ -234,7 +297,7 @@ input, textarea {
   border: 1px solid var(--border-light);
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
-  transition: all 0.25s ease;
+  transition: all 0.4s ease;
 }
 
 .card:hover {
@@ -243,12 +306,17 @@ input, textarea {
 }
 
 .card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .card-hover:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Amber glow on hover — campfire warmth */
+.card-glow:hover {
+  box-shadow: 0 0 20px rgba(201, 149, 107, 0.15), 0 0 40px rgba(201, 149, 107, 0.08);
 }
 
 /* Link hover underline effect */
@@ -264,7 +332,7 @@ input, textarea {
   width: 0;
   height: 1.5px;
   background: var(--accent);
-  transition: width 0.25s ease;
+  transition: width 0.4s ease;
 }
 
 .link-hover:hover::after {
@@ -302,8 +370,8 @@ input, textarea {
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -311,12 +379,13 @@ input, textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: var(--accent);
+  border-radius: 3px;
+  opacity: 0.6;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-soft);
+  background: var(--accent-light);
 }
 
 /* Focus states */
@@ -376,7 +445,8 @@ input, textarea {
 /* Divider */
 .divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.3;
 }
 
 /* Tag styling */
@@ -589,7 +659,7 @@ input, textarea {
 .input-field:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.1);
+  box-shadow: 0 0 0 3px rgba(201, 149, 107, 0.15);
 }
 
 .input-field::placeholder {
@@ -613,7 +683,7 @@ input, textarea {
 .textarea-field:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.1);
+  box-shadow: 0 0 0 3px rgba(201, 149, 107, 0.15);
 }
 
 .textarea-field::placeholder {
@@ -657,6 +727,97 @@ a img,
 button img,
 .clickable-image {
   pointer-events: auto;
+}
+
+/* Leaflet map - allow all interactions */
+.leaflet-container,
+.leaflet-container * {
+  pointer-events: auto !important;
+  user-select: none;
+}
+
+.leaflet-container img {
+  pointer-events: auto !important;
+  -webkit-user-drag: none;
+}
+
+.leaflet-tile-pane,
+.leaflet-marker-pane,
+.leaflet-overlay-pane,
+.leaflet-popup-pane {
+  pointer-events: auto !important;
+}
+
+/* Fix marker icon display */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  pointer-events: auto !important;
+}
+
+/* Custom marker styling */
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.path-point {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Ensure map container has proper dimensions */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;
+  background: var(--background-alt);
+}
+
+/* Fix for map controls */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--background-card) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--background-alt) !important;
+}
+
+/* Attribution styling */
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.8) !important;
+  font-size: 10px !important;
+}
+
+.dark .leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.7) !important;
+  color: var(--muted) !important;
+}
+
+.dark .leaflet-control-attribution a {
+  color: var(--accent) !important;
+}
+
+/* Popup styling */
+.leaflet-popup-content-wrapper {
+  background: var(--background-card) !important;
+  color: var(--foreground) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--background-card) !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px !important;
 }
 
 /* Protected image wrapper - adds invisible overlay */
@@ -786,8 +947,8 @@ button img,
 }
 
 .image-grid-item:hover {
-  transform: scale(1.02);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  transform: scale(1.01);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Caption reveal animation */
@@ -885,4 +1046,153 @@ kbd {
 .image-reveal.loaded {
   opacity: 1;
   transform: scale(1);
+}
+
+/* Accessibility utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.focus-visible:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Toast notification styles */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.875rem 1.25rem;
+  background: var(--foreground);
+  color: var(--background);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  animation: toastIn 0.3s ease;
+}
+
+.toast-success {
+  background: var(--success);
+}
+
+.toast-error {
+  background: var(--error);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Page transition animation */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-in {
+  animation: pageIn 0.6s ease forwards;
+}
+
+/* Mobile menu animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Back to top button pulse on hover */
+@keyframes backToTopPulse {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Hero carousel Ken Burns effect — slower, more contemplative */
+@keyframes kenBurns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.06) translate(-1%, -0.5%);
+  }
+}
+
+.hero-carousel-image {
+  animation: kenBurns 15s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel-image {
+    animation: none;
+  }
 }

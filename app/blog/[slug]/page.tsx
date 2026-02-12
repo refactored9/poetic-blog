@@ -6,6 +6,9 @@ import { Blog } from "@/types/blog";
 import ShareButton from "./ShareButton";
 import ReadingProgress from "./ReadingProgress";
 import ImageGallery from "@/components/ImageGallery";
+import Comments from "@/components/Comments";
+import ReactionButton from "@/components/ReactionButton";
+import BookmarkButton from "@/components/BookmarkButton";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -88,7 +91,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 function JsonLd({ blog }: { blog: Blog }) {
-  const structuredData = {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
+
+  const blogPostingSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: blog.title,
@@ -96,21 +101,68 @@ function JsonLd({ blog }: { blog: Blog }) {
     author: {
       "@type": "Person",
       name: blog.author,
+      url: `${siteUrl}/about`,
+    },
+    publisher: {
+      "@type": "Person",
+      name: blog.author,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/og-image.jpg`,
+      },
     },
     datePublished: blog.publishedAt,
     dateModified: blog.updatedAt || blog.publishedAt,
-    image: blog.coverImage || undefined,
+    image: blog.coverImage ? {
+      "@type": "ImageObject",
+      url: blog.coverImage,
+    } : undefined,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || ""}/blog/${blog.slug}`,
+      "@id": `${siteUrl}/blog/${blog.slug}`,
     },
+    wordCount: blog.content?.split(/\s+/).length || 0,
+    keywords: blog.tags?.join(", "),
+    articleSection: "Travel",
+    inLanguage: "en-US",
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Writings",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: blog.title,
+        item: `${siteUrl}/blog/${blog.slug}`,
+      },
+    ],
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+    </>
   );
 }
 
@@ -149,7 +201,7 @@ export default async function BlogPage({ params }: PageProps) {
                 priority
               />
               {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             </div>
 
             {/* Back Button - Fixed */}
@@ -176,7 +228,7 @@ export default async function BlogPage({ params }: PageProps) {
                     {blog.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1 text-xs md:text-sm text-white/90 bg-white/20 backdrop-blur-sm rounded-full"
+                        className="px-2.5 py-1 text-xs text-white/80 border border-white/30 rounded-full"
                       >
                         {tag}
                       </span>
@@ -200,7 +252,7 @@ export default async function BlogPage({ params }: PageProps) {
                   <span className="w-1 h-1 rounded-full bg-white/50" />
                   <time>{formattedDate}</time>
                   <span className="w-1 h-1 rounded-full bg-white/50" />
-                  <span>{blog.readingTime} min read</span>
+                  <span>{blog.readingTime} min contemplation</span>
                 </div>
               </div>
             </div>
@@ -252,7 +304,7 @@ export default async function BlogPage({ params }: PageProps) {
                 <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
                 <time>{formattedDate}</time>
                 <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
-                <span>{blog.readingTime} min read</span>
+                <span>{blog.readingTime} min contemplation</span>
               </div>
             </div>
           </header>
@@ -276,14 +328,13 @@ export default async function BlogPage({ params }: PageProps) {
                 <div className="sticky top-24 flex flex-col items-center gap-4">
                   <ShareButton title={blog.title} />
                   <div className="w-px h-8 bg-[var(--border)]" />
-                  <button
-                    className="p-2 text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
-                    title="Bookmark"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                    </svg>
-                  </button>
+                  <BookmarkButton
+                    blogId={blog.id || blog._id || blog.slug}
+                    blogSlug={blog.slug}
+                    blogTitle={blog.title}
+                    blogExcerpt={blog.excerpt}
+                    blogCoverImage={blog.coverImage}
+                  />
                 </div>
               </aside>
 
@@ -342,9 +393,21 @@ export default async function BlogPage({ params }: PageProps) {
                   </div>
                 )}
 
-                {/* Mobile Share */}
+                {/* Mobile Share & Actions */}
                 <div className="flex items-center justify-center gap-4 mt-12 pt-8 border-t border-[var(--border)] lg:hidden">
                   <ShareButton title={blog.title} />
+                  <BookmarkButton
+                    blogId={blog.id || blog._id || blog.slug}
+                    blogSlug={blog.slug}
+                    blogTitle={blog.title}
+                    blogExcerpt={blog.excerpt}
+                    blogCoverImage={blog.coverImage}
+                  />
+                </div>
+
+                {/* Reactions */}
+                <div className="flex justify-center mt-8">
+                  <ReactionButton blogId={blog.id || blog._id || blog.slug} />
                 </div>
               </div>
 
@@ -360,7 +423,7 @@ export default async function BlogPage({ params }: PageProps) {
             <div className="wide-width">
               <div className="text-center mb-10 md:mb-14">
                 <p className="text-xs md:text-sm tracking-[0.2em] text-[var(--muted)] uppercase mb-2">
-                  Visual Stories
+                  Captured Moments
                 </p>
                 <h2 className="text-2xl md:text-4xl font-serif">Places Along the Way</h2>
               </div>
@@ -370,8 +433,11 @@ export default async function BlogPage({ params }: PageProps) {
           </section>
         )}
 
+        {/* Comments Section */}
+        <Comments blogId={blog.id || blog._id || blog.slug} />
+
         {/* Author Section */}
-        <section className="py-12 md:py-16 border-t border-[var(--border)]">
+        <section className="py-10 md:py-12 border-t border-[var(--border)]">
           <div className="wide-width max-w-3xl">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
               <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[var(--foreground)] flex items-center justify-center text-[var(--background)] font-serif text-2xl md:text-3xl flex-shrink-0">
@@ -405,9 +471,9 @@ export default async function BlogPage({ params }: PageProps) {
             <div className="wide-width">
               <div className="text-center mb-10 md:mb-14">
                 <p className="text-xs md:text-sm tracking-[0.2em] text-[var(--muted)] uppercase mb-2">
-                  Continue Reading
+                  Continue the Journey
                 </p>
-                <h2 className="text-2xl md:text-4xl font-serif">More Stories</h2>
+                <h2 className="text-2xl md:text-4xl font-serif">More Wanderings</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
@@ -423,7 +489,7 @@ export default async function BlogPage({ params }: PageProps) {
                           src={relatedBlog.coverImage}
                           alt={relatedBlog.title}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="object-cover group-hover:scale-102 transition-transform duration-500"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -441,7 +507,7 @@ export default async function BlogPage({ params }: PageProps) {
                         })}
                       </time>
                       <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
-                      <span>{relatedBlog.readingTime} min read</span>
+                      <span>{relatedBlog.readingTime} min contemplation</span>
                     </div>
                     <h3 className="text-lg md:text-xl font-serif group-hover:text-[var(--accent)] transition-colors">
                       {relatedBlog.title}
