@@ -177,7 +177,7 @@ export default function StudioDashboard() {
         </header>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-8 md:mb-12">
           <Link
             href="/studio/journeys"
             className="card p-4 md:p-6 hover:border-[var(--accent)] transition-colors group"
@@ -191,7 +191,24 @@ export default function StudioDashboard() {
               </div>
               <div>
                 <h3 className="font-medium text-sm md:text-base">Journeys</h3>
-                <p className="text-xs md:text-sm text-[var(--muted)]">Photo galleries & travel stories</p>
+                <p className="text-xs md:text-sm text-[var(--muted)]">Photo galleries & maps</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/studio/people"
+            className="card p-4 md:p-6 hover:border-[var(--accent)] transition-colors group"
+          >
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--background-alt)] flex items-center justify-center group-hover:bg-[var(--accent)]/10 transition-colors">
+                <svg className="w-5 h-5 md:w-6 md:h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-sm md:text-base">People</h3>
+                <p className="text-xs md:text-sm text-[var(--muted)]">Manage local guides</p>
               </div>
             </div>
           </Link>

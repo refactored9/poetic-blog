@@ -14,6 +14,32 @@ interface OptimizedImageProps {
   priority?: boolean;
   quality?: number;
   onClick?: () => void;
+  blurDataURL?: string;
+  placeholderColor?: string;
+}
+
+// Generate a simple color-based blur placeholder
+function generatePlaceholderColor(src: string): string {
+  // Generate a color based on the image URL hash
+  let hash = 0;
+  for (let i = 0; i < src.length; i++) {
+    const char = src.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+
+  // Generate warm, muted colors that fit the aesthetic
+  const hue = Math.abs(hash % 60) + 20; // Warm tones (20-80)
+  const saturation = Math.abs((hash >> 8) % 15) + 10; // Low saturation (10-25%)
+  const lightness = Math.abs((hash >> 16) % 20) + 60; // Light (60-80%)
+
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
+// Create a simple blur data URL
+function createBlurDataURL(color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="${color}"/></svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
 export default function OptimizedImage({
@@ -27,11 +53,17 @@ export default function OptimizedImage({
   priority = false,
   quality = 75,
   onClick,
+  blurDataURL,
+  placeholderColor,
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const [hasError, setHasError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Generate placeholder color/blur
+  const bgColor = placeholderColor || generatePlaceholderColor(src);
+  const blurPlaceholder = blurDataURL || createBlurDataURL(bgColor);
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -63,11 +95,14 @@ export default function OptimizedImage({
       className={`relative overflow-hidden ${fill ? "w-full h-full" : ""}`}
       onClick={onClick}
     >
-      {/* Skeleton placeholder */}
+      {/* Blur/Color placeholder */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--background-alt)] via-[var(--border-light)] to-[var(--background-alt)] animate-pulse">
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{ backgroundColor: bgColor }}
+        >
+          {/* Shimmer effect overlay */}
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
       )}
 
@@ -99,6 +134,8 @@ export default function OptimizedImage({
               onLoad={() => setIsLoaded(true)}
               onError={() => setHasError(true)}
               loading={priority ? "eager" : "lazy"}
+              placeholder={blurPlaceholder ? "blur" : "empty"}
+              blurDataURL={blurPlaceholder}
             />
           ) : (
             <Image
@@ -114,6 +151,8 @@ export default function OptimizedImage({
               onLoad={() => setIsLoaded(true)}
               onError={() => setHasError(true)}
               loading={priority ? "eager" : "lazy"}
+              placeholder={blurPlaceholder ? "blur" : "empty"}
+              blurDataURL={blurPlaceholder}
             />
           )}
         </>

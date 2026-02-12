@@ -42,7 +42,7 @@ function GearCard({ item }: { item: Gear }) {
             src={item.image}
             alt={item.name}
             fill
-            className="object-contain p-6 group-hover:scale-105 transition-transform duration-300"
+            className="object-contain p-6 group-hover:scale-102 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           {item.isFavorite && (
@@ -98,32 +98,45 @@ export default async function GearPage() {
   const categories = Object.keys(gearByCategory);
 
   return (
-    <div className="min-h-screen py-12 md:py-16">
-      <div className="wide-width">
-        {/* Header */}
-        <div className="max-w-2xl mb-12">
+    <div className="min-h-screen">
+      {/* Hero Header */}
+      <header className="py-8 md:py-12">
+        <div className="wide-width">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8 md:mb-12 group"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back
+            Back to home
           </Link>
 
-          <h1 className="text-3xl md:text-4xl font-serif mb-3">
-            Gear I Use
-          </h1>
-          <p className="text-[var(--muted)] text-lg">
-            The tools and equipment I use for creating content, traveling, and everyday work.
-          </p>
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 md:w-12 h-px bg-[var(--accent)]" />
+              <span className="text-[var(--accent)] text-xs md:text-sm font-medium tracking-[0.2em] uppercase">
+                My Setup
+              </span>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif mb-4 md:mb-6 leading-[1.1]">
+              Gear
+            </h1>
+
+            <p className="text-[var(--muted)] text-base md:text-lg max-w-xl">
+              The tools and equipment I use for creating content, traveling, and everyday work.
+            </p>
+          </div>
         </div>
+      </header>
+
+      <main className="wide-width pb-12 md:pb-16">
 
         {gear.length > 0 ? (
           <div>
             {categories.map((category, categoryIndex) => (
-              <div key={category} className={`${categoryIndex > 0 ? "mt-16 pt-16 border-t border-[var(--border)]" : ""}`}>
+              <div key={category} className={`${categoryIndex > 0 ? "mt-20 pt-20 border-t border-[var(--border)]" : ""}`}>
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-sm font-medium tracking-wide uppercase text-[var(--muted)]">
                     {categoryLabels[category]}
@@ -153,7 +166,7 @@ export default async function GearPage() {
         )}
 
         {/* Footer links */}
-        <div className="mt-16 pt-8 border-t border-[var(--border)]">
+        <div className="mt-20 pt-10 border-t border-[var(--border)]">
           <div className="flex flex-wrap gap-6">
             <Link
               href="/about"
@@ -175,7 +188,7 @@ export default async function GearPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { uploadMultipleImages } from "@/lib/api";
+import { JourneyRoute } from "@/types/blog";
+import RouteEditor from "@/components/RouteEditor";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
@@ -23,6 +25,7 @@ interface JourneyFormData {
   coverImage: string;
   images: JourneyImage[];
   isPublished: boolean;
+  route?: JourneyRoute;
 }
 
 export default function JourneyEditorPage() {
@@ -39,6 +42,7 @@ export default function JourneyEditorPage() {
     coverImage: "",
     images: [],
     isPublished: false,
+    route: undefined,
   });
 
   const [loading, setLoading] = useState(!isNew);
@@ -67,6 +71,7 @@ export default function JourneyEditorPage() {
           coverImage: journey.coverImage || "",
           images: journey.images || [],
           isPublished: journey.isPublished || false,
+          route: journey.route || undefined,
         });
       } else {
         setError("Journey not found");
@@ -342,6 +347,12 @@ export default function JourneyEditorPage() {
               </div>
             )}
           </div>
+
+          {/* Route Editor */}
+          <RouteEditor
+            route={formData.route}
+            onChange={(route) => setFormData((prev) => ({ ...prev, route }))}
+          />
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4">

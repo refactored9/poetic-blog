@@ -8,6 +8,80 @@ export const metadata: Metadata = {
   description: "Learn more about me and my story.",
 };
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
+
+function AboutJsonLd({ about }: { about: About | null }) {
+  if (!about) return null;
+
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: about.name,
+    description: about.tagline,
+    image: about.profileImage,
+    url: `${SITE_URL}/about`,
+    email: about.email,
+    address: about.location ? {
+      "@type": "PostalAddress",
+      addressLocality: about.location,
+    } : undefined,
+    sameAs: about.socialLinks?.map((link) => link.url) || [],
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "About",
+        item: `${SITE_URL}/about`,
+      },
+    ],
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "The Solo Akash",
+    url: SITE_URL,
+    description: "A quiet corner for thoughts, places, and poetry. Stories told through words and wanderings.",
+    author: {
+      "@type": "Person",
+      name: about.name,
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/?search={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+    </>
+  );
+}
+
 async function getAbout(): Promise<About | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
@@ -59,10 +133,12 @@ export default async function AboutPage() {
   const about = await getAbout();
 
   return (
-    <div className="min-h-screen py-10 md:py-16 lg:py-24">
+    <>
+      <AboutJsonLd about={about} />
+      <div className="min-h-screen py-8 md:py-12">
       <div className="wide-width">
         {/* Main two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16 lg:gap-20">
 
           {/* Left: Profile Image */}
           <div className="lg:col-span-5">
@@ -200,34 +276,24 @@ export default async function AboutPage() {
             )}
 
             {/* Navigation Links */}
-            <div className="mt-8 md:mt-12 pt-6 md:pt-10 border-t border-[var(--border)]">
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4">
+            <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t border-[var(--border)]">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 md:gap-4">
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-all"
+                  className="px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--accent)] transition-colors"
                 >
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
                   Writings
                 </Link>
                 <Link
                   href="/journeys"
-                  className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-all"
+                  className="px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--accent)] transition-colors"
                 >
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  </svg>
                   Journeys
                 </Link>
                 <Link
                   href="/gear"
-                  className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-all"
+                  className="px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--accent)] transition-colors"
                 >
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
                   Gear
                 </Link>
               </div>
@@ -236,5 +302,6 @@ export default async function AboutPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

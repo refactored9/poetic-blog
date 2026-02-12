@@ -1,4 +1,4 @@
-import { Blog, BlogFormData, Journey } from '@/types/blog';
+import { Blog, BlogFormData, Journey, Guide, GuideFormData } from '@/types/blog';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -235,6 +235,160 @@ export async function getTopPages(): Promise<TopPage[]> {
     if (!response.ok) {
       return [];
     }
+    return response.json();
+  } catch {
+    return [];
+  }
+}
+
+// Studio Authentication
+export interface LoginResponse {
+  success: boolean;
+  token?: string;
+  expiresAt?: number;
+  message?: string;
+}
+
+export async function studioLogin(password: string): Promise<LoginResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/studio/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+
+    return response.json();
+  } catch {
+    return { success: false, message: 'Connection error' };
+  }
+}
+
+export async function studioVerify(token: string): Promise<{ valid: boolean }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/studio/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+
+    if (!response.ok) {
+      return { valid: false };
+    }
+
+    return response.json();
+  } catch {
+    return { valid: false };
+  }
+}
+
+export async function studioLogout(token: string): Promise<void> {
+  try {
+    await fetch(`${API_BASE_URL}/auth/studio/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+  } catch {
+    // Ignore logout errors
+  }
+}
+
+// Guide/People APIs
+export async function getAllGuides(options?: {
+  published?: boolean;
+  featured?: boolean;
+  location?: string;
+  search?: string;
+  limit?: number;
+}): Promise<Guide[]> {
+  const params = new URLSearchParams();
+  if (options?.published) params.append('published', 'true');
+  if (options?.featured) params.append('featured', 'true');
+  if (options?.location) params.append('location', options.location);
+  if (options?.search) params.append('search', options.search);
+  if (options?.limit) params.append('limit', options.limit.toString());
+
+  const queryString = params.toString();
+  const url = queryString ? `${API_BASE_URL}/guides?${queryString}` : `${API_BASE_URL}/guides`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return [];
+    return response.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function getPublishedGuides(): Promise<Guide[]> {
+  return getAllGuides({ published: true });
+}
+
+export async function getFeaturedGuides(): Promise<Guide[]> {
+  return getAllGuides({ published: true, featured: true });
+}
+
+export async function getGuideBySlug(slug: string): Promise<Guide | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/guides/${slug}`);
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getGuideById(id: string): Promise<Guide | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/guides/${id}`);
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function createGuide(data: GuideFormData): Promise<Guide> {
+  return fetchApi<Guide>('/guides', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateGuide(id: string, data: Partial<GuideFormData>): Promise<Guide> {
+  return fetchApi<Guide>(`/guides/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteGuide(id: string): Promise<void> {
+  await fetchApi(`/guides/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export interface GuideLocations {
+  cities: string[];
+  states: string[];
+  countries: string[];
+  areas: string[];
+}
+
+export async function getGuideLocations(): Promise<GuideLocations> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/guides/locations/list`);
+    if (!response.ok) return { cities: [], states: [], countries: [], areas: [] };
+    return response.json();
+  } catch {
+    return { cities: [], states: [], countries: [], areas: [] };
+  }
+}
+
+export async function getGuideSpecializations(): Promise<string[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/guides/specializations/list`);
+    if (!response.ok) return [];
     return response.json();
   } catch {
     return [];

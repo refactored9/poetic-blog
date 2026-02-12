@@ -36,6 +36,21 @@ function getSource(): string {
   }
 }
 
+function shouldSkipTracking(): boolean {
+  // Skip if user is logged into studio (admin)
+  const studioToken = localStorage.getItem("studio_token");
+  if (studioToken) return true;
+
+  // Skip if user has opted out of tracking
+  const doNotTrack = localStorage.getItem("dnt");
+  if (doNotTrack === "1") return true;
+
+  // Skip if browser Do Not Track is enabled (optional - respect user preference)
+  if (navigator.doNotTrack === "1") return true;
+
+  return false;
+}
+
 function VisitorTrackerInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -43,6 +58,11 @@ function VisitorTrackerInner() {
   useEffect(() => {
     // Skip tracking for studio pages
     if (pathname.startsWith("/studio")) {
+      return;
+    }
+
+    // Skip tracking for admin users or opted-out users
+    if (shouldSkipTracking()) {
       return;
     }
 

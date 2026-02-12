@@ -1,44 +1,97 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 interface StudioAuthContextType {
   isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
+  isLoading: boolean;
+  login: (password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
 }
 
 const StudioAuthContext = createContext<StudioAuthContextType | null>(null);
-
-// This should match STUDIO_PASSWORD in your .env.local
-const STUDIO_PASSWORD = process.env.NEXT_PUBLIC_STUDIO_PASSWORD || "akash2024";
 
 export function StudioAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Verify existing token on mount
   useEffect(() => {
-    // Check if already authenticated from session storage
-    const auth = sessionStorage.getItem("studio_auth");
-    if (auth === "true") {
-      setIsAuthenticated(true);
+    async function verifySession() {
+      const token = localStorage.getItem("studio_token");
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/studio/verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.valid) {
+            setIsAuthenticated(true);
+          } else {
+            localStorage.removeItem("studio_token");
+          }
+        } else {
+          localStorage.removeItem("studio_token");
+        }
+      } catch {
+        // If verification fails, clear the token
+        localStorage.removeItem("studio_token");
+      }
+
+      setIsLoading(false);
     }
-    setIsLoading(false);
+
+    verifySession();
   }, []);
 
-  const login = (password: string): boolean => {
-    if (password === STUDIO_PASSWORD) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("studio_auth", "true");
-      return true;
-    }
-    return false;
-  };
+  const login = useCallback(async (password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/studio/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
 
-  const logout = () => {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem("studio_token", data.token);
+        setIsAuthenticated(true);
+        return { success: true };
+      }
+
+      return { success: false, error: data.message || "Invalid password" };
+    } catch {
+      return { success: false, error: "Connection error. Please try again." };
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    const token = localStorage.getItem("studio_token");
+
+    try {
+      await fetch(`${API_BASE_URL}/auth/studio/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+    } catch {
+      // Ignore logout errors
+    }
+
+    localStorage.removeItem("studio_token");
     setIsAuthenticated(false);
-    sessionStorage.removeItem("studio_auth");
-  };
+  }, []);
 
   if (isLoading) {
     return (
@@ -49,7 +102,7 @@ export function StudioAuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <StudioAuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <StudioAuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
       {children}
     </StudioAuthContext.Provider>
   );
@@ -67,13 +120,27 @@ export function StudioLoginGate({ children }: { children: ReactNode }) {
   const { isAuthenticated, login } = useStudioAuth();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!login(password)) {
-      setError("Incorrect password");
+
+    if (!password.trim()) {
+      setError("Please enter a password");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
+
+    const result = await login(password);
+
+    if (!result.success) {
+      setError(result.error || "Invalid password");
       setPassword("");
     }
+
+    setIsSubmitting(false);
   };
 
   if (isAuthenticated) {
@@ -103,7 +170,8 @@ export function StudioLoginGate({ children }: { children: ReactNode }) {
                 setError("");
               }}
               placeholder="Password"
-              className="w-full px-4 py-3 bg-[var(--background-card)] border border-[var(--border)] rounded-lg focus:border-[var(--accent)] focus:outline-none text-center tracking-widest"
+              disabled={isSubmitting}
+              className="w-full px-4 py-3 bg-[var(--background-card)] border border-[var(--border)] rounded-lg focus:border-[var(--accent)] focus:outline-none text-center tracking-widest disabled:opacity-50"
               autoFocus
             />
           </div>
@@ -114,9 +182,20 @@ export function StudioLoginGate({ children }: { children: ReactNode }) {
 
           <button
             type="submit"
-            className="w-full py-3 bg-[var(--foreground)] text-[var(--background)] rounded-lg hover:bg-[var(--accent)] transition-colors font-medium"
+            disabled={isSubmitting}
+            className="w-full py-3 bg-[var(--foreground)] text-[var(--background)] rounded-lg hover:bg-[var(--accent)] transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Enter Studio
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Verifying...
+              </>
+            ) : (
+              "Enter Studio"
+            )}
           </button>
         </form>
 

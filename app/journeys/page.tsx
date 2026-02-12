@@ -4,11 +4,83 @@ import { Journey } from "@/types/blog";
 import JourneyGallery from "@/components/JourneyGallery";
 import JourneyCoverImage from "@/components/JourneyCoverImage";
 import ShareButton from "@/components/ShareButton";
+import JourneyMap from "@/components/JourneyMap";
 
 export const metadata: Metadata = {
   title: "Journeys | Visual Stories",
   description: "Visual stories from places I've wandered. A collection of moments captured along the way.",
 };
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
+
+function JourneysJsonLd({ journeys }: { journeys: Journey[] }) {
+  const totalImages = journeys.reduce((sum, j) => sum + j.images.length, 0);
+
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Journeys - Visual Stories",
+    description: "Visual stories from places I've wandered. A collection of moments captured along the way.",
+    url: `${SITE_URL}/journeys`,
+    numberOfItems: journeys.length,
+    hasPart: journeys.map((journey) => ({
+      "@type": "ImageGallery",
+      name: journey.title,
+      description: journey.description,
+      numberOfItems: journey.images.length,
+      contentLocation: {
+        "@type": "Place",
+        name: journey.location,
+      },
+      dateCreated: journey.date,
+    })),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Journeys",
+        item: `${SITE_URL}/journeys`,
+      },
+    ],
+  };
+
+  const imageGallerySchema = {
+    "@context": "https://schema.org",
+    "@type": "ImageGallery",
+    name: "The Solo Akash - Travel Photography",
+    description: `A collection of ${totalImages} photographs from ${journeys.length} journeys.`,
+    url: `${SITE_URL}/journeys`,
+    numberOfItems: totalImages,
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(imageGallerySchema) }}
+      />
+    </>
+  );
+}
 
 async function getJourneys(): Promise<Journey[]> {
   try {
@@ -98,6 +170,13 @@ function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
         </div>
       </div>
 
+      {/* Hiking Map (if route exists) */}
+      {journey.route?.enabled && (
+        <div className="mb-8 md:mb-12">
+          <JourneyMap route={journey.route} journeyTitle={journey.title} />
+        </div>
+      )}
+
       {/* Photo Gallery */}
       <JourneyGallery
         images={journey.images}
@@ -114,17 +193,11 @@ export default async function JourneysPage() {
   const totalImages = journeys.reduce((sum, journey) => sum + journey.images.length, 0);
 
   return (
-    <div className="min-h-screen">
+    <>
+      <JourneysJsonLd journeys={journeys} />
+      <div className="min-h-screen">
       {/* Hero Header */}
-      <header className="relative py-16 md:py-24 lg:py-32 overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-[0.02]">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, var(--foreground) 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
-
+      <header className="relative py-8 md:py-12 overflow-hidden">
         <div className="wide-width relative">
           {/* Back link */}
           <Link
@@ -160,34 +233,19 @@ export default async function JourneysPage() {
 
             {/* Stats */}
             {journeys.length > 0 && (
-              <div className="flex items-center gap-6 md:gap-8 mt-8 md:mt-10">
-                <div className="text-center">
-                  <p className="text-3xl md:text-4xl font-serif text-[var(--foreground)]">{totalImages}</p>
-                  <p className="text-xs md:text-sm text-[var(--muted)] mt-1 tracking-wide uppercase">Photographs</p>
-                </div>
-                <div className="w-px h-12 bg-[var(--border)]" />
-                <div className="text-center">
-                  <p className="text-3xl md:text-4xl font-serif text-[var(--foreground)]">{journeys.length}</p>
-                  <p className="text-xs md:text-sm text-[var(--muted)] mt-1 tracking-wide uppercase">Journeys</p>
-                </div>
+              <div className="flex items-center gap-6 mt-8 md:mt-10 text-sm text-[var(--muted)]">
+                <span>{totalImages} photographs</span>
+                <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
+                <span>{journeys.length} journeys</span>
               </div>
             )}
           </div>
 
-          {/* Decorative element */}
-          <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 opacity-10">
-            <svg className="w-64 h-64" viewBox="0 0 200 200" fill="none">
-              <circle cx="100" cy="100" r="80" stroke="var(--foreground)" strokeWidth="0.5" />
-              <circle cx="100" cy="100" r="60" stroke="var(--foreground)" strokeWidth="0.5" />
-              <circle cx="100" cy="100" r="40" stroke="var(--foreground)" strokeWidth="0.5" />
-              <path d="M100 20 L100 180 M20 100 L180 100" stroke="var(--foreground)" strokeWidth="0.5" />
-            </svg>
-          </div>
         </div>
       </header>
 
       {/* Journeys Content */}
-      <main className="wide-width pb-16 md:pb-24">
+      <main className="wide-width pb-12 md:pb-16">
         {journeys.length > 0 ? (
           <div className="space-y-0">
             {journeys.map((journey, index) => (
@@ -209,49 +267,7 @@ export default async function JourneysPage() {
           </div>
         )}
       </main>
-
-      {/* Footer Section */}
-      <footer className="border-t border-[var(--border)] bg-[var(--background-alt)]">
-        <div className="wide-width py-10 md:py-16">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            {/* Quote */}
-            <div className="max-w-md">
-              <p className="text-[var(--muted)] text-sm md:text-base font-serif italic">
-                &ldquo;Not all those who wander are lost.&rdquo;
-              </p>
-              <p className="text-[var(--muted)]/60 text-xs mt-1">— J.R.R. Tolkien</p>
-            </div>
-
-            {/* Links */}
-            <div className="flex flex-wrap gap-4 md:gap-6">
-              <Link
-                href="/"
-                className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-              >
-                Writings
-              </Link>
-              <Link
-                href="/about"
-                className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-              >
-                About
-              </Link>
-              <Link
-                href="/gear"
-                className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-              >
-                Gear
-              </Link>
-              <Link
-                href="/contact"
-                className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-              >
-                Contact
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
+    </>
   );
 }
