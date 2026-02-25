@@ -145,7 +145,7 @@ function MapContent({ route }: { route: JourneyRoute }) {
     return (
       <div className="h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
         <div className="text-center">
-          <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <div className="w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
           <p className="text-sm text-[var(--muted)]">Loading map...</p>
         </div>
       </div>
@@ -224,7 +224,7 @@ export default function JourneyMap({ route, journeyTitle, compact = false }: Jou
     return (
       <div className={`bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 ${compact ? '' : 'rounded-xl overflow-hidden'}`}>
         <div className="aspect-[2/1] flex items-center justify-center">
-          <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -248,7 +248,7 @@ export default function JourneyMap({ route, journeyTitle, compact = false }: Jou
         <MapContent route={route} />
       </div>
 
-      <div className="p-4 md:p-5 border-t border-[var(--border)]">
+      <div className="p-5 md:p-6 border-t border-[var(--border)]">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h3 className="font-serif text-lg md:text-xl">{route.name || journeyTitle}</h3>

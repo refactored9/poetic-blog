@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Sans_3 } from "next/font/google";
+import { Oswald, Roboto } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import Header from "@/components/Header";
@@ -13,16 +13,18 @@ import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import StarField from "@/components/StarField";
 
-const playfair = Playfair_Display({
+const oswald = Oswald({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
+  weight: ["200", "300", "400", "500", "600", "700"],
 });
 
-const sourceSans = Source_Sans_3({
+const roboto = Roboto({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  weight: ["300", "400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -81,7 +83,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${sourceSans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${oswald.variable} ${roboto.variable}`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col antialiased">
         <ThemeProvider>
           <StarField />

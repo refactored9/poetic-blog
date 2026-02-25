@@ -20,7 +20,7 @@ function JourneysJsonLd({ journeys }: { journeys: Journey[] }) {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Journeys - Visual Stories",
-    description: "Visual stories from places I've wandered. A collection of moments captured along the way.",
+    description: "Visual stories from places I've wandered.",
     url: `${SITE_URL}/journeys`,
     numberOfItems: journeys.length,
     hasPart: journeys.map((journey) => ({
@@ -28,10 +28,7 @@ function JourneysJsonLd({ journeys }: { journeys: Journey[] }) {
       name: journey.title,
       description: journey.description,
       numberOfItems: journey.images.length,
-      contentLocation: {
-        "@type": "Place",
-        name: journey.location,
-      },
+      contentLocation: { "@type": "Place", name: journey.location },
       dateCreated: journey.date,
     })),
   };
@@ -40,18 +37,8 @@ function JourneysJsonLd({ journeys }: { journeys: Journey[] }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: SITE_URL,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Journeys",
-        item: `${SITE_URL}/journeys`,
-      },
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Journeys", item: `${SITE_URL}/journeys` },
     ],
   };
 
@@ -66,18 +53,9 @@ function JourneysJsonLd({ journeys }: { journeys: Journey[] }) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(imageGallerySchema) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(imageGallerySchema) }} />
     </>
   );
 }
@@ -85,14 +63,8 @@ function JourneysJsonLd({ journeys }: { journeys: Journey[] }) {
 async function getJourneys(): Promise<Journey[]> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
-    const res = await fetch(`${apiUrl}/journeys?published=true`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!res.ok) {
-      return [];
-    }
-
+    const res = await fetch(`${apiUrl}/journeys?published=true`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
     return await res.json();
   } catch {
     return [];
@@ -103,12 +75,16 @@ function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
   const isEven = index % 2 === 0;
 
   return (
-    <article className="journey-section mb-20 md:mb-32 last:mb-0">
-      {/* Journey Header */}
-      <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-6 md:gap-12 mb-8 md:mb-12`}>
+    <article
+      id={journey.id}
+      className="journey-section pt-16 md:pt-24 border-t border-[var(--border)] first:border-t-0 first:pt-0"
+    >
+      {/* Journey header — title + info */}
+      <div className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} gap-10 md:gap-16 mb-12 md:mb-16`}>
+
         {/* Cover Image */}
         {journey.coverImage && (
-          <div className="md:w-1/3 lg:w-2/5">
+          <div className="w-full md:w-[42%] flex-shrink-0">
             <JourneyCoverImage
               src={journey.coverImage}
               alt={journey.title}
@@ -118,48 +94,47 @@ function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
           </div>
         )}
 
-        {/* Journey Info */}
-        <div className={`flex-1 flex flex-col justify-center ${!journey.coverImage ? 'max-w-2xl' : ''}`}>
-          {/* Date & Location */}
-          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-[var(--muted)] mb-3 md:mb-4">
-            <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {journey.location}
-            </span>
-            <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
-            <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              {new Date(journey.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-              })}
-            </span>
-          </div>
+        {/* Info */}
+        <div className="flex-1 flex flex-col justify-center py-2 md:py-6">
+          {/* Index number */}
+          <p className="section-label mb-5">
+            Journey {String(index + 1).padStart(2, "0")}
+          </p>
 
           {/* Title */}
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-serif mb-3 md:mb-4 leading-tight">
+          <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-wide leading-tight mb-5">
             {journey.title}
           </h2>
 
+          {/* Location + Date */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--muted)] mb-6">
+            {journey.location && (
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {journey.location}
+              </span>
+            )}
+            <span className="w-px h-3 bg-[var(--border)]" />
+            <span>
+              {new Date(journey.date).toLocaleDateString("en-US", { year: "numeric", month: "long" })}
+            </span>
+          </div>
+
           {/* Description */}
           {journey.description && (
-            <p className="text-[var(--muted)] text-base md:text-lg leading-relaxed max-w-xl">
+            <p className="text-[var(--muted)] text-base md:text-lg leading-relaxed mb-8 max-w-lg">
               {journey.description}
             </p>
           )}
 
-          {/* Decorative line & Share */}
-          <div className="mt-6 md:mt-8 flex items-center justify-between">
+          {/* Footer row */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 md:w-16 h-px bg-[var(--accent)]" />
-              <span className="text-[var(--accent)] text-xs md:text-sm font-medium tracking-widest uppercase">
-                {journey.images.length} Moments
-              </span>
+              <span className="section-label">{journey.images.length} photos</span>
             </div>
             <ShareButton
               url={`/journeys#${journey.id}`}
@@ -170,9 +145,9 @@ function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
         </div>
       </div>
 
-      {/* Hiking Map (if route exists) */}
+      {/* Hiking Map */}
       {journey.route?.enabled && (
-        <div className="mb-8 md:mb-12">
+        <div className="mb-12 md:mb-16">
           <JourneyMap route={journey.route} journeyTitle={journey.title} />
         </div>
       )}
@@ -189,85 +164,69 @@ function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
 
 export default async function JourneysPage() {
   const journeys = await getJourneys();
-
   const totalImages = journeys.reduce((sum, journey) => sum + journey.images.length, 0);
 
   return (
     <>
       <JourneysJsonLd journeys={journeys} />
       <div className="min-h-screen">
-      {/* Hero Header */}
-      <header className="relative py-8 md:py-12 overflow-hidden">
-        <div className="wide-width relative">
-          {/* Back link */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8 md:mb-12 group"
-          >
-            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to writings
-          </Link>
 
-          {/* Main title */}
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 md:w-12 h-px bg-[var(--accent)]" />
-              <span className="text-[var(--accent)] text-xs md:text-sm font-medium tracking-[0.2em] uppercase">
-                Visual Stories
-              </span>
+        {/* Hero */}
+        <header className="py-16 md:py-24">
+          <div className="wide-width">
+            <div className="max-w-2xl">
+              <p className="section-label mb-5">Visual Stories</p>
+              <h1 className="font-serif font-semibold text-4xl md:text-5xl tracking-wide leading-tight mb-6">
+                Journeys
+              </h1>
+              <p className="text-[var(--muted)] text-base md:text-lg leading-relaxed max-w-lg mb-8">
+                Visual fragments from the places I&apos;ve wandered. Each photograph holds a story, each moment a memory frozen in time.
+              </p>
+
+              {journeys.length > 0 && (
+                <div className="flex items-center gap-6 text-sm text-[var(--muted)]">
+                  <span className="font-medium text-[var(--foreground)]">{journeys.length}</span>
+                  <span>journeys</span>
+                  <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
+                  <span className="font-medium text-[var(--foreground)]">{totalImages}</span>
+                  <span>photographs</span>
+                </div>
+              )}
             </div>
+          </div>
+        </header>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif mb-4 md:mb-6 leading-[1.1]">
-              Journeys
-            </h1>
-
-            <p className="text-[var(--muted)] text-lg md:text-xl lg:text-2xl font-serif italic leading-relaxed">
-              &ldquo;The world is a book, and those who do not travel read only one page.&rdquo;
-            </p>
-
-            <p className="text-[var(--muted)] text-base md:text-lg mt-4 md:mt-6 max-w-xl">
-              Visual fragments from the places I&apos;ve wandered. Each photograph holds a story, each moment a memory frozen in time.
-            </p>
-
-            {/* Stats */}
-            {journeys.length > 0 && (
-              <div className="flex items-center gap-6 mt-8 md:mt-10 text-sm text-[var(--muted)]">
-                <span>{totalImages} photographs</span>
-                <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
-                <span>{journeys.length} journeys</span>
+        {/* Journey Cards */}
+        <main className="wide-width pb-24 md:pb-32">
+          {journeys.length > 0 ? (
+            <div>
+              {journeys.map((journey, index) => (
+                <JourneyCard key={journey.id} journey={journey} index={index} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-28 md:py-36">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--background-alt)] mb-6">
+                <svg className="w-8 h-8 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
               </div>
-            )}
-          </div>
-
-        </div>
-      </header>
-
-      {/* Journeys Content */}
-      <main className="wide-width pb-12 md:pb-16">
-        {journeys.length > 0 ? (
-          <div className="space-y-0">
-            {journeys.map((journey, index) => (
-              <JourneyCard key={journey.id} journey={journey} index={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-24 md:py-32">
-            <div className="inline-block p-4 rounded-full bg-[var(--background-alt)] mb-6">
-              <svg className="w-12 h-12 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <h2 className="text-xl md:text-2xl font-serif font-semibold tracking-wide mb-3">No journeys yet</h2>
+              <p className="text-[var(--muted)] text-sm">
+                The road awaits. New adventures coming soon.
+              </p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 mt-8 text-[0.68rem] tracking-[0.15em] uppercase font-medium text-[var(--foreground)] pb-px border-b border-[var(--foreground)] hover:opacity-50 transition-opacity duration-200"
+              >
+                Back to writings
+              </Link>
             </div>
-            <h2 className="text-xl md:text-2xl font-serif mb-2">No journeys yet</h2>
-            <p className="text-[var(--muted)] font-serif italic">
-              The road awaits. New adventures coming soon.
-            </p>
-          </div>
-        )}
-      </main>
-    </div>
+          )}
+        </main>
+      </div>
     </>
   );
 }

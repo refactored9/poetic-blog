@@ -18,46 +18,60 @@ export default function BlogCard({ blog, variant = "default" }: BlogCardProps) {
     return (
       <article className="group">
         <Link href={`/blog/${blog.slug}`} className="block">
+          {/* Image */}
           {blog.coverImage && (
-            <div className="relative aspect-[2/1] mb-5 overflow-hidden rounded-lg image-hover">
+            <div className="relative aspect-[16/9] mb-8 overflow-hidden bg-[var(--background-alt)]">
               <Image
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
                 sizes="(max-width: 768px) 100vw, 768px"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              {/* Featured badge */}
+              <div className="absolute top-5 left-5">
+                <span className="bg-white text-black text-[0.6rem] tracking-[0.2em] uppercase px-3 py-1.5 font-medium">
+                  Featured
+                </span>
+              </div>
             </div>
           )}
-          <div className="flex items-center gap-3 mb-2">
-            <time className="text-xs tracking-wide text-[var(--muted)]">
-              {formattedDate}
-            </time>
-            {blog.tags && blog.tags[0] && (
-              <>
-                <span className="text-[var(--border)]">·</span>
-                <span className="text-xs text-[var(--accent)]">{blog.tags[0]}</span>
-              </>
+
+          {/* Meta */}
+          <div className="flex items-center gap-3 mb-5">
+            {blog.tags?.[0] && (
+              <span className="text-[0.6rem] tracking-[0.2em] uppercase text-[var(--accent)] font-medium">
+                {blog.tags[0]}
+              </span>
             )}
+            <span className="w-px h-3 bg-[var(--border)]" />
+            <time className="text-[0.6rem] tracking-[0.1em] text-[var(--muted)]">{formattedDate}</time>
           </div>
-          <h2 className="text-2xl md:text-3xl font-serif text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors mb-2 leading-tight">
+
+          {/* Title */}
+          <h2 className="font-serif font-semibold text-2xl md:text-3xl tracking-wide leading-tight mb-4 group-hover:opacity-60 transition-opacity duration-200">
             {blog.title}
           </h2>
-          <p className="text-[var(--muted)] leading-relaxed line-clamp-2 mb-4">
-            {blog.excerpt}
-          </p>
-          <span className="inline-flex items-center gap-2 text-sm text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
-            Read story
+
+          {/* Excerpt */}
+          {blog.excerpt && (
+            <p className="text-[var(--muted)] leading-relaxed line-clamp-2 text-sm md:text-base mb-7">
+              {blog.excerpt}
+            </p>
+          )}
+
+          {/* Read CTA */}
+          <div className="flex items-center gap-3">
+            <span className="text-[0.65rem] tracking-[0.15em] uppercase font-medium text-[var(--foreground)]">
+              Read Story
+            </span>
             <svg
-              className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+              className="w-3.5 h-3.5 transform group-hover:translate-x-1.5 transition-transform duration-300"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </span>
+          </div>
         </Link>
       </article>
     );
@@ -65,27 +79,31 @@ export default function BlogCard({ blog, variant = "default" }: BlogCardProps) {
 
   if (variant === "compact") {
     return (
-      <article className="group py-4">
-        <Link href={`/blog/${blog.slug}`} className="flex gap-4 items-start">
+      <article className="group py-5 border-b border-[var(--border)] last:border-b-0">
+        <Link href={`/blog/${blog.slug}`} className="flex gap-5 items-start">
           {blog.coverImage && (
-            <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded image-hover">
+            <div className="relative flex-shrink-0 overflow-hidden bg-[var(--background-alt)]" style={{ width: 72, height: 72 }}>
               <Image
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
-                className="object-cover"
-                sizes="80px"
+                className="object-cover group-hover:scale-[1.05] transition-transform duration-500"
+                sizes="72px"
               />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <h3 className="font-serif text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors line-clamp-2 leading-snug">
+            <h3 className="font-serif text-sm font-semibold tracking-wide leading-snug mb-2 group-hover:opacity-60 transition-opacity duration-200 line-clamp-2">
               {blog.title}
             </h3>
-            <div className="mt-1 flex items-center gap-2 text-xs text-[var(--muted)]">
-              <time>{formattedDate}</time>
-              <span className="text-[var(--border)]">|</span>
-              <span>{blog.readingTime} min</span>
+            <div className="flex items-center gap-2">
+              <time className="text-[0.6rem] tracking-[0.08em] text-[var(--muted)]">{formattedDate}</time>
+              {blog.readingTime && (
+                <>
+                  <span className="w-px h-2.5 bg-[var(--border)]" />
+                  <span className="text-[0.6rem] tracking-[0.08em] text-[var(--muted)]">{blog.readingTime} min</span>
+                </>
+              )}
             </div>
           </div>
         </Link>
@@ -93,49 +111,61 @@ export default function BlogCard({ blog, variant = "default" }: BlogCardProps) {
     );
   }
 
-  // Default variant
+  // Default variant — horizontal editorial layout
   return (
-    <article className="group py-10 border-b border-[var(--border)] last:border-b-0">
+    <article className="group py-10 md:py-12 border-b border-[var(--border)] last:border-b-0">
       <Link href={`/blog/${blog.slug}`} className="block">
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col md:flex-row gap-7 md:gap-10">
+          {/* Image */}
           {blog.coverImage && (
-            <div className="relative w-full md:w-48 aspect-[16/9] md:aspect-square flex-shrink-0 overflow-hidden rounded image-hover">
+            <div className="relative w-full md:w-56 h-44 md:h-36 flex-shrink-0 overflow-hidden bg-[var(--background-alt)]">
               <Image
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 192px"
+                className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+                sizes="(max-width: 768px) 100vw, 224px"
               />
             </div>
           )}
+
+          {/* Content */}
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <time className="text-xs tracking-widest text-[var(--muted)] uppercase">
-                {formattedDate}
-              </time>
-              {blog.tags && blog.tags[0] && (
-                <>
-                  <span className="w-1 h-1 rounded-full bg-[var(--accent)]" />
-                  <span className="text-xs text-[var(--accent)]">{blog.tags[0]}</span>
-                </>
+            {/* Meta */}
+            <div className="flex items-center gap-3 mb-4">
+              {blog.tags?.[0] && (
+                <span className="text-[0.6rem] tracking-[0.15em] uppercase text-[var(--accent)] font-medium">
+                  {blog.tags[0]}
+                </span>
               )}
+              <span className="w-px h-3 bg-[var(--border)]" />
+              <time className="text-[0.6rem] tracking-[0.1em] text-[var(--muted)]">{formattedDate}</time>
             </div>
-            <h2 className="text-xl md:text-2xl font-serif text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors mb-3 leading-tight">
+
+            {/* Title */}
+            <h2 className="font-serif font-semibold text-xl md:text-2xl tracking-wide leading-tight mb-3 group-hover:opacity-60 transition-opacity duration-200">
               {blog.title}
             </h2>
-            <p className="text-[var(--muted)] leading-relaxed line-clamp-2 mb-4">
-              {blog.excerpt}
-            </p>
-            <div className="flex items-center gap-4 text-xs text-[var(--muted)]">
-              <span>{blog.readingTime} min read</span>
-              <span className="flex items-center gap-1 group-hover:text-[var(--accent)] transition-colors">
-                Read more
+
+            {/* Excerpt */}
+            {blog.excerpt && (
+              <p className="text-[var(--muted)] text-sm leading-relaxed line-clamp-2 mb-5">
+                {blog.excerpt}
+              </p>
+            )}
+
+            {/* Footer */}
+            <div className="flex items-center gap-5">
+              {blog.readingTime && (
+                <span className="text-[0.6rem] tracking-[0.1em] uppercase text-[var(--muted)]">
+                  {blog.readingTime} min read
+                </span>
+              )}
+              <span className="flex items-center gap-2 text-[0.6rem] tracking-[0.15em] uppercase font-medium text-[var(--foreground)] group-hover:opacity-60 transition-opacity duration-200">
+                Read
                 <svg
-                  className="w-3 h-3 transform group-hover:translate-x-0.5 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                  className="w-3 h-3 transform group-hover:translate-x-0.5 transition-transform duration-200"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

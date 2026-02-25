@@ -37,12 +37,12 @@ function GearCard({ item }: { item: Gear }) {
   return (
     <div className="group">
       {item.image && (
-        <div className="relative aspect-square rounded-xl overflow-hidden bg-[var(--background-alt)] mb-4">
+        <div className="relative aspect-square overflow-hidden bg-[var(--background-alt)] mb-6">
           <Image
             src={item.image}
             alt={item.name}
             fill
-            className="object-contain p-6 group-hover:scale-102 transition-transform duration-300"
+            className="object-contain p-6 group-hover:scale-[1.04] transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           {item.isFavorite && (
@@ -53,14 +53,14 @@ function GearCard({ item }: { item: Gear }) {
         </div>
       )}
       <div>
-        <p className="text-xs text-[var(--muted)] uppercase tracking-wide mb-1">
+        <p className="section-label mb-2">
           {categoryLabels[item.category]}
         </p>
-        <h3 className="font-serif text-lg mb-1 group-hover:text-[var(--accent)] transition-colors">
+        <h3 className="font-serif text-lg font-semibold tracking-wide mb-2.5 group-hover:opacity-60 transition-opacity duration-200">
           {item.name}
         </h3>
         {item.description && (
-          <p className="text-sm text-[var(--muted)] line-clamp-2 mb-3">
+          <p className="text-sm text-[var(--muted)] line-clamp-2 mb-4 leading-relaxed">
             {item.description}
           </p>
         )}
@@ -100,11 +100,11 @@ export default async function GearPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Header */}
-      <header className="py-8 md:py-12">
+      <header className="py-16 md:py-24">
         <div className="wide-width">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8 md:mb-12 group"
+            className="inline-flex items-center gap-2 text-[0.68rem] tracking-[0.15em] uppercase text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-10 md:mb-16 group"
           >
             <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -113,14 +113,9 @@ export default async function GearPage() {
           </Link>
 
           <div className="max-w-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 md:w-12 h-px bg-[var(--accent)]" />
-              <span className="text-[var(--accent)] text-xs md:text-sm font-medium tracking-[0.2em] uppercase">
-                My Setup
-              </span>
-            </div>
+            <p className="section-label mb-4">My Setup</p>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif mb-4 md:mb-6 leading-[1.1]">
+            <h1 className="font-serif font-semibold text-4xl md:text-5xl tracking-wide leading-tight mb-4 md:mb-6">
               Gear
             </h1>
 
@@ -131,21 +126,21 @@ export default async function GearPage() {
         </div>
       </header>
 
-      <main className="wide-width pb-12 md:pb-16">
+      <main className="wide-width pb-20 md:pb-28">
 
         {gear.length > 0 ? (
           <div>
             {categories.map((category, categoryIndex) => (
-              <div key={category} className={`${categoryIndex > 0 ? "mt-20 pt-20 border-t border-[var(--border)]" : ""}`}>
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-sm font-medium tracking-wide uppercase text-[var(--muted)]">
+              <div key={category} className={`${categoryIndex > 0 ? "mt-28 pt-28 border-t border-[var(--border)]" : ""}`}>
+                <div className="flex items-center justify-between mb-10">
+                  <h2 className="section-label">
                     {categoryLabels[category]}
                   </h2>
                   <span className="text-sm text-[var(--muted)]">
                     {gearByCategory[category].length} items
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 md:gap-12">
                   {gearByCategory[category].map((item) => (
                     <GearCard key={item.id} item={item} />
                   ))}

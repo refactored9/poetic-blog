@@ -135,15 +135,15 @@ export default async function AboutPage() {
   return (
     <>
       <AboutJsonLd about={about} />
-      <div className="min-h-screen py-8 md:py-12">
+      <div className="min-h-screen py-16 md:py-24">
       <div className="wide-width">
         {/* Main two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16 lg:gap-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20 lg:gap-28">
 
           {/* Left: Profile Image */}
           <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-32">
-              <div className="relative aspect-[4/5] max-w-sm mx-auto lg:max-w-none rounded-xl md:rounded-2xl overflow-hidden bg-[var(--background-alt)]">
+              <div className="relative aspect-[4/5] max-w-sm mx-auto lg:max-w-none overflow-hidden bg-[var(--background-alt)]">
                 {about?.profileImage ? (
                   <Image
                     src={about.profileImage}
@@ -170,7 +170,7 @@ export default async function AboutPage() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--foreground)] transition-colors"
+                      className="w-8 h-8 md:w-9 md:h-9 border border-[var(--border)] flex items-center justify-center text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--foreground)] transition-colors"
                       title={link.platform}
                     >
                       <SocialIcon platform={link.platform} />
@@ -184,8 +184,8 @@ export default async function AboutPage() {
           {/* Right: Content */}
           <div className="lg:col-span-7">
             {/* Header */}
-            <div className="mb-6 md:mb-10 text-center lg:text-left">
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-serif mb-2 md:mb-3">
+            <div className="mb-8 md:mb-12 text-center lg:text-left">
+              <h1 className="font-serif font-semibold text-4xl md:text-5xl tracking-wide leading-tight mb-3 md:mb-4">
                 {about?.name || "Hello"}
               </h1>
               <p className="text-base md:text-lg text-[var(--muted)] font-serif">
@@ -194,7 +194,7 @@ export default async function AboutPage() {
             </div>
 
             {/* Location & Email */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4 mb-6 md:mb-10 text-xs md:text-sm text-[var(--muted)]">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-6 mb-10 md:mb-14 text-sm text-[var(--muted)]">
               {about?.location && (
                 <div className="flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +246,7 @@ export default async function AboutPage() {
             {/* Story */}
             {about?.story && (
               <div className="pt-6 md:pt-10 border-t border-[var(--border)]">
-                <h2 className="text-xs md:text-sm font-medium tracking-wide uppercase text-[var(--muted)] mb-4 md:mb-6">
+                <h2 className="section-label mb-4 md:mb-6">
                   My Story
                 </h2>
                 {about.story.includes("<") ? (
@@ -280,19 +280,19 @@ export default async function AboutPage() {
               <div className="flex flex-wrap justify-center lg:justify-start gap-3 md:gap-4">
                 <Link
                   href="/"
-                  className="px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--accent)] transition-colors"
+                  className="text-[0.68rem] tracking-[0.15em] uppercase font-medium text-[var(--muted)] hover:text-[var(--foreground)] pb-px border-b border-transparent hover:border-[var(--foreground)] transition-all duration-200"
                 >
                   Writings
                 </Link>
                 <Link
                   href="/journeys"
-                  className="px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--accent)] transition-colors"
+                  className="text-[0.68rem] tracking-[0.15em] uppercase font-medium text-[var(--muted)] hover:text-[var(--foreground)] pb-px border-b border-transparent hover:border-[var(--foreground)] transition-all duration-200"
                 >
                   Journeys
                 </Link>
                 <Link
                   href="/gear"
-                  className="px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-[var(--border)] text-xs md:text-sm hover:border-[var(--accent)] transition-colors"
+                  className="text-[0.68rem] tracking-[0.15em] uppercase font-medium text-[var(--muted)] hover:text-[var(--foreground)] pb-px border-b border-transparent hover:border-[var(--foreground)] transition-all duration-200"
                 >
                   Gear
                 </Link>

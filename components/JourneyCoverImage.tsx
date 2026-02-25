@@ -47,7 +47,7 @@ export default function JourneyCoverImage({
   return (
     <div
       ref={containerRef}
-      className="relative aspect-[4/3] md:aspect-[3/4] overflow-hidden rounded-xl md:rounded-2xl group"
+      className="relative aspect-[4/3] md:aspect-[2/3] overflow-hidden rounded-xl md:rounded-2xl group"
     >
       {/* Skeleton placeholder */}
       <div

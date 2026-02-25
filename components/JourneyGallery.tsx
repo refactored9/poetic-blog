@@ -202,12 +202,12 @@ export default function JourneyGallery({ images, journeyLocation }: JourneyGalle
   return (
     <>
       {/* Image Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         {images.map((image, index) => (
           <div
             key={image.id}
             onClick={() => openLightbox(index)}
-            className="relative aspect-square overflow-hidden rounded-lg cursor-pointer group bg-[var(--background-alt)]"
+            className="relative aspect-square overflow-hidden rounded-xl cursor-pointer group bg-[var(--background-alt)]"
           >
             <Image
               src={image.url}
