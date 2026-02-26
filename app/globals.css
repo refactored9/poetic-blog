@@ -81,11 +81,14 @@ body {
 }
 
 /* Typography — Oswald for headings (editorial/magazine style) */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif), sans-serif;
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
+/* Must be in @layer base so Tailwind utility classes (font-light, font-extralight, etc.) can override */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif), sans-serif;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+  }
 }
 
 .font-serif {

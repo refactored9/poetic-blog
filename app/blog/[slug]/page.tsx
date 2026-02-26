@@ -33,7 +33,7 @@ async function getRelatedBlogs(currentSlug: string): Promise<Blog[]> {
     if (!res.ok) return [];
     const data = await res.json();
     const blogs = data.data || [];
-    return blogs.filter((b: Blog) => b.slug !== currentSlug).slice(0, 2);
+    return blogs.filter((b: Blog) => b.slug !== currentSlug).slice(0, 3);
   } catch {
     return [];
   }
@@ -46,15 +46,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: blog.title,
     description: blog.excerpt,
-    authors: [{ name: blog.author }],
+    authors: [{ name: blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash" }],
     openGraph: {
       title: blog.title,
       description: blog.excerpt,
       type: "article",
       publishedTime: blog.publishedAt,
       modifiedTime: blog.updatedAt,
-      authors: [blog.author],
-      images: blog.coverImage ? [{ url: blog.coverImage, width: 1200, height: 630, alt: blog.title }] : [],
+      authors: [blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash"],
+      images: blog.coverImage
+        ? [{ url: blog.coverImage, width: 1200, height: 630, alt: blog.title }]
+        : [],
     },
     twitter: {
       card: "summary_large_image",
@@ -67,36 +69,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 function JsonLd({ blog }: { blog: Blog }) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
-  const blogPostingSchema = {
+  const schema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: blog.title,
     description: blog.excerpt,
-    author: { "@type": "Person", name: blog.author, url: `${siteUrl}/about` },
-    publisher: { "@type": "Person", name: blog.author, logo: { "@type": "ImageObject", url: `${siteUrl}/og-image.jpg` } },
+    author: { "@type": "Person", name: blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash", url: `${siteUrl}/about` },
     datePublished: blog.publishedAt,
     dateModified: blog.updatedAt || blog.publishedAt,
     image: blog.coverImage ? { "@type": "ImageObject", url: blog.coverImage } : undefined,
     mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}/blog/${blog.slug}` },
     wordCount: blog.content?.split(/\s+/).length || 0,
     keywords: blog.tags?.join(", "),
-    articleSection: "Travel",
-    inLanguage: "en-US",
-  };
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Writings", item: siteUrl },
-      { "@type": "ListItem", position: 3, name: blog.title, item: `${siteUrl}/blog/${blog.slug}` },
-    ],
   };
   return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-    </>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
   );
 }
 
@@ -116,129 +103,95 @@ export default async function BlogPage({ params }: PageProps) {
       <JsonLd blog={blog} />
       <ReadingProgress />
 
-      <article className="min-h-screen">
+      <article>
 
-        {/* ── HERO ── */}
-        {blog.coverImage ? (
-          <header className="relative h-[60vh] md:h-[75vh] lg:h-[85vh] w-full">
-            <div className="absolute inset-0">
-              <Image src={blog.coverImage} alt={blog.title} fill className="object-cover" priority />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        {/* ── BREADCRUMB ── */}
+        <div className="wide-width pt-6 pb-8">
+          <Link
+            href="/"
+            className="group inline-flex items-center gap-2 text-[0.65rem] tracking-[0.18em] uppercase text-[var(--muted)] hover:text-[var(--foreground)] transition-colors duration-200"
+          >
+            <svg
+              className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform duration-200"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Writings
+          </Link>
+        </div>
+
+        {/* ── COVER IMAGE — clean, no overlay ── */}
+        {blog.coverImage && (
+          <div className="wide-width mb-0">
+            <div className="relative aspect-[16/9] overflow-hidden bg-[var(--background-alt)]">
+              <Image
+                src={blog.coverImage}
+                alt={blog.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, 1160px"
+              />
             </div>
-
-            {/* Back link */}
-            <div className="absolute top-6 left-0 right-0 z-10">
-              <div className="wide-width">
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.18em] uppercase text-white/70 hover:text-white transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                  Writings
-                </Link>
-              </div>
-            </div>
-
-            {/* Content overlay */}
-            <div className="absolute bottom-0 left-0 right-0 pb-10 md:pb-16 lg:pb-20">
-              <div className="wide-width max-w-4xl">
-                {/* Tags */}
-                {blog.tags && blog.tags.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 mb-5">
-                    {blog.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="px-3 py-1 text-[0.6rem] tracking-[0.15em] uppercase text-white/80 border border-white/25">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Title */}
-                <h1 className="font-serif font-semibold text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-wide mb-5">
-                  {blog.title}
-                </h1>
-
-                {/* Meta */}
-                <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-white/20 flex items-center justify-center text-white font-serif text-xs font-medium">
-                      {blog.author.charAt(0)}
-                    </div>
-                    <span className="text-[0.7rem] tracking-[0.1em] uppercase">{blog.author}</span>
-                  </div>
-                  <span className="w-px h-3 bg-white/30" />
-                  <time className="text-[0.7rem] tracking-[0.08em]">{formattedDate}</time>
-                  <span className="w-px h-3 bg-white/30" />
-                  <span className="text-[0.7rem] tracking-[0.08em]">{blog.readingTime} min read</span>
-                </div>
-              </div>
-            </div>
-          </header>
-
-        ) : (
-          /* Header without cover image */
-          <header className="py-16 md:py-20 border-b border-[var(--border)]">
-            <div className="wide-width">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.18em] uppercase text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-10 group"
-              >
-                <svg className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Writings
-              </Link>
-            </div>
-            <div className="wide-width max-w-4xl">
-              {blog.tags && blog.tags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 mb-5">
-                  {blog.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="px-3 py-1 text-[0.6rem] tracking-[0.15em] uppercase text-[var(--accent)] border border-[var(--border)]">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <h1 className="font-serif font-semibold text-3xl md:text-4xl lg:text-5xl leading-tight tracking-wide mb-5">
-                {blog.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-3 text-[var(--muted)]">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 bg-[var(--foreground)] flex items-center justify-center text-[var(--background)] font-serif text-xs font-medium">
-                    {blog.author.charAt(0)}
-                  </div>
-                  <span className="text-[0.7rem] tracking-[0.1em] uppercase">{blog.author}</span>
-                </div>
-                <span className="w-px h-3 bg-[var(--border)]" />
-                <time className="text-[0.7rem] tracking-[0.08em]">{formattedDate}</time>
-                <span className="w-px h-3 bg-[var(--border)]" />
-                <span className="text-[0.7rem] tracking-[0.08em]">{blog.readingTime} min read</span>
-              </div>
-            </div>
-          </header>
+          </div>
         )}
 
-        {/* ── EXCERPT ── */}
-        <section className="py-12 md:py-16 border-b border-[var(--border)]">
-          <div className="wide-width max-w-3xl">
-            <p className="font-serif text-lg md:text-xl text-[var(--muted)] leading-relaxed tracking-wide italic">
-              {blog.excerpt}
-            </p>
+        {/* ── ARTICLE HEADER — on linen, below image ── */}
+        <header className="wide-width pt-10 pb-10 md:pt-14 md:pb-14 border-b border-[var(--border)]">
+          <div className="max-w-3xl mx-auto text-center">
+
+            {/* Tags */}
+            {blog.tags && blog.tags.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+                {blog.tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[0.6rem] tracking-[0.2em] uppercase text-[var(--accent)] font-medium"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Title */}
+            <h1 className="font-serif font-semibold text-3xl md:text-4xl lg:text-5xl tracking-wide leading-tight mb-8">
+              {blog.title}
+            </h1>
+
+            {/* Meta row */}
+            <div className="flex flex-wrap items-center justify-center gap-3 text-[var(--muted)]">
+              <span className="text-[0.65rem] tracking-[0.12em] uppercase">{blog.author && blog.author.toLowerCase() !== "anonymous" ? blog.author : "Akash"}</span>
+              <span className="w-px h-3 bg-[var(--border)]" />
+              <time className="text-[0.65rem] tracking-[0.1em]">{formattedDate}</time>
+              <span className="w-px h-3 bg-[var(--border)]" />
+              <span className="text-[0.65rem] tracking-[0.1em]">{blog.readingTime} min read</span>
+            </div>
           </div>
-        </section>
+        </header>
 
-        {/* ── MAIN CONTENT ── */}
-        <section className="py-14 md:py-20">
-          <div className="wide-width">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        {/* ── EXCERPT / LEAD ── */}
+        {blog.excerpt && (
+          <div className="wide-width py-10 md:py-14 border-b border-[var(--border)]">
+            <div className="max-w-2xl mx-auto">
+              <p className="font-serif text-lg md:text-xl text-[var(--muted)] leading-relaxed tracking-wide italic text-center">
+                {blog.excerpt}
+              </p>
+            </div>
+          </div>
+        )}
 
-              {/* Sidebar actions */}
-              <aside className="hidden lg:block lg:col-span-1">
-                <div className="sticky top-24 flex flex-col items-center gap-4">
+        {/* ── BODY ── */}
+        <div className="wide-width py-14 md:py-20">
+          <div className="max-w-2xl mx-auto">
+
+            {/* Floating actions — left of content on desktop */}
+            <div className="relative">
+              <div className="hidden lg:flex flex-col items-center gap-4 absolute -left-16 top-0">
+                <div className="sticky top-28 flex flex-col items-center gap-3">
                   <ShareButton title={blog.title} />
-                  <div className="w-px h-8 bg-[var(--border)]" />
+                  <div className="w-px h-6 bg-[var(--border)]" />
                   <BookmarkButton
                     blogId={blog.id || blog._id || blog.slug}
                     blogSlug={blog.slug}
@@ -246,88 +199,88 @@ export default async function BlogPage({ params }: PageProps) {
                     blogExcerpt={blog.excerpt}
                     blogCoverImage={blog.coverImage}
                   />
-                </div>
-              </aside>
-
-              {/* Article body */}
-              <div className="lg:col-span-8 lg:col-start-2">
-                {blog.content.includes("<") ? (
-                  <div
-                    className="prose prose-lg max-w-none
-                      [&_p]:mb-7 [&_p]:leading-[1.9] [&_p]:text-[var(--foreground)] [&_p]:text-base md:[&_p]:text-lg
-                      [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-serif [&_h2]:font-semibold [&_h2]:tracking-wide [&_h2]:mt-14 [&_h2]:mb-5 [&_h2]:text-[var(--foreground)]
-                      [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-serif [&_h3]:font-semibold [&_h3]:tracking-wide [&_h3]:mt-10 [&_h3]:mb-4 [&_h3]:text-[var(--foreground)]
-                      [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:mb-7 [&_ul]:space-y-3
-                      [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:mb-7 [&_ol]:space-y-3
-                      [&_li]:text-[var(--foreground)] [&_li]:leading-[1.8] [&_li]:text-base md:[&_li]:text-lg
-                      [&_blockquote]:border-l-2 [&_blockquote]:border-[var(--foreground)] [&_blockquote]:pl-6 md:[&_blockquote]:pl-8 [&_blockquote]:py-2 [&_blockquote]:my-10 [&_blockquote]:italic [&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:font-serif [&_blockquote]:text-[var(--muted)]
-                      [&_strong]:font-semibold [&_em]:italic
-                      [&_a]:text-[var(--foreground)] [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-[var(--border)] hover:[&_a]:decoration-[var(--foreground)]
-                      [&_u]:underline [&_s]:line-through
-                      [&_hr]:my-12 [&_hr]:border-[var(--border)]
-                      [&_img]:my-8"
-                    dangerouslySetInnerHTML={{ __html: blog.content }}
-                  />
-                ) : (
-                  <div className="space-y-7">
-                    {blog.content.split("\n\n").map((paragraph, index) => {
-                      if (paragraph.startsWith("## ")) {
-                        return (
-                          <h2 key={index} className="font-serif font-semibold text-2xl md:text-3xl tracking-wide mt-14 mb-5">
-                            {paragraph.replace("## ", "")}
-                          </h2>
-                        );
-                      }
-                      if (paragraph.startsWith("### ")) {
-                        return (
-                          <h3 key={index} className="font-serif font-semibold text-xl md:text-2xl tracking-wide mt-10 mb-4">
-                            {paragraph.replace("### ", "")}
-                          </h3>
-                        );
-                      }
-                      if (paragraph.startsWith("> ")) {
-                        return (
-                          <blockquote key={index} className="border-l-2 border-[var(--foreground)] pl-6 md:pl-8 my-10 italic text-lg md:text-xl font-serif text-[var(--muted)]">
-                            {paragraph.replace("> ", "")}
-                          </blockquote>
-                        );
-                      }
-                      return (
-                        <p key={index} className="leading-[1.9] text-base md:text-lg text-[var(--foreground)]">
-                          {paragraph}
-                        </p>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Mobile actions */}
-                <div className="flex items-center justify-center gap-4 mt-12 pt-8 border-t border-[var(--border)] lg:hidden">
-                  <ShareButton title={blog.title} />
-                  <BookmarkButton
-                    blogId={blog.id || blog._id || blog.slug}
-                    blogSlug={blog.slug}
-                    blogTitle={blog.title}
-                    blogExcerpt={blog.excerpt}
-                    blogCoverImage={blog.coverImage}
-                  />
-                </div>
-
-                <div className="flex justify-center mt-8">
-                  <ReactionButton blogId={blog.id || blog._id || blog.slug} />
                 </div>
               </div>
 
-              <div className="hidden lg:block lg:col-span-3" />
+              {/* Article content */}
+              {blog.content.includes("<") ? (
+                <div
+                  className="
+                    [&_p]:text-[var(--foreground)] [&_p]:text-base [&_p]:leading-[1.9] [&_p]:mb-6
+                    [&_h2]:font-serif [&_h2]:font-semibold [&_h2]:text-2xl [&_h2]:tracking-wide [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-[var(--foreground)]
+                    [&_h3]:font-serif [&_h3]:font-semibold [&_h3]:text-xl [&_h3]:tracking-wide [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-[var(--foreground)]
+                    [&_ul]:list-disc [&_ul]:ml-5 [&_ul]:mb-6 [&_ul]:space-y-2
+                    [&_ol]:list-decimal [&_ol]:ml-5 [&_ol]:mb-6 [&_ol]:space-y-2
+                    [&_li]:text-[var(--foreground)] [&_li]:text-base [&_li]:leading-relaxed
+                    [&_blockquote]:border-l-2 [&_blockquote]:border-[var(--foreground)] [&_blockquote]:pl-6 [&_blockquote]:my-8 [&_blockquote]:italic [&_blockquote]:text-lg [&_blockquote]:font-serif [&_blockquote]:text-[var(--muted)]
+                    [&_strong]:font-semibold
+                    [&_em]:italic
+                    [&_a]:text-[var(--foreground)] [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-[var(--border)] hover:[&_a]:decoration-[var(--foreground)] [&_a]:transition-all
+                    [&_hr]:my-10 [&_hr]:border-[var(--border)]
+                    [&_img]:w-full [&_img]:my-8 [&_img]:object-cover
+                    [&_p:first-of-type::first-letter]:font-serif [&_p:first-of-type::first-letter]:text-5xl [&_p:first-of-type::first-letter]:font-bold [&_p:first-of-type::first-letter]:float-left [&_p:first-of-type::first-letter]:leading-[0.85] [&_p:first-of-type::first-letter]:mr-2 [&_p:first-of-type::first-letter]:mt-1.5 [&_p:first-of-type::first-letter]:text-[var(--foreground)]
+                  "
+                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                />
+              ) : (
+                <div className="space-y-6">
+                  {blog.content.split("\n\n").map((paragraph, index) => {
+                    if (paragraph.startsWith("## ")) {
+                      return (
+                        <h2 key={index} className="font-serif font-semibold text-2xl tracking-wide mt-12 mb-4 text-[var(--foreground)]">
+                          {paragraph.replace("## ", "")}
+                        </h2>
+                      );
+                    }
+                    if (paragraph.startsWith("### ")) {
+                      return (
+                        <h3 key={index} className="font-serif font-semibold text-xl tracking-wide mt-8 mb-3 text-[var(--foreground)]">
+                          {paragraph.replace("### ", "")}
+                        </h3>
+                      );
+                    }
+                    if (paragraph.startsWith("> ")) {
+                      return (
+                        <blockquote key={index} className="border-l-2 border-[var(--foreground)] pl-6 my-8 italic text-lg font-serif text-[var(--muted)]">
+                          {paragraph.replace("> ", "")}
+                        </blockquote>
+                      );
+                    }
+                    return (
+                      <p key={index} className="text-base leading-[1.9] text-[var(--foreground)]">
+                        {paragraph}
+                      </p>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile share row */}
+            <div className="flex items-center justify-center gap-5 mt-12 pt-10 border-t border-[var(--border)] lg:hidden">
+              <ShareButton title={blog.title} />
+              <div className="w-px h-5 bg-[var(--border)]" />
+              <BookmarkButton
+                blogId={blog.id || blog._id || blog.slug}
+                blogSlug={blog.slug}
+                blogTitle={blog.title}
+                blogExcerpt={blog.excerpt}
+                blogCoverImage={blog.coverImage}
+              />
+            </div>
+
+            {/* Reactions */}
+            <div className="flex justify-center mt-8 pt-8 border-t border-[var(--border)] lg:border-t-0 lg:pt-0 lg:mt-10">
+              <ReactionButton blogId={blog.id || blog._id || blog.slug} />
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* ── PLACE IMAGES GALLERY ── */}
+        {/* ── PLACE IMAGES ── */}
         {blog.placeImages && blog.placeImages.length > 0 && (
-          <section className="py-12 md:py-20 border-t border-[var(--border)] bg-[var(--background-alt)]">
+          <section className="border-t border-[var(--border)] bg-[var(--background-alt)] py-14 md:py-20">
             <div className="wide-width">
-              <div className="mb-10 md:mb-14">
+              <div className="mb-10">
                 <p className="section-label mb-3">Captured Moments</p>
                 <h2 className="font-serif font-semibold text-2xl md:text-3xl tracking-wide">Places Along the Way</h2>
               </div>
@@ -340,24 +293,25 @@ export default async function BlogPage({ params }: PageProps) {
         <Comments blogId={blog.id || blog._id || blog.slug} />
 
         {/* ── AUTHOR ── */}
-        <section className="py-14 md:py-20 border-t border-[var(--border)]">
-          <div className="wide-width max-w-3xl">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-[var(--foreground)] flex items-center justify-center text-[var(--background)] font-serif text-2xl md:text-3xl font-medium flex-shrink-0">
-                {blog.author.charAt(0)}
+        <section className="border-t border-[var(--border)] py-14 md:py-16">
+          <div className="wide-width">
+            <div className="max-w-2xl mx-auto flex items-start gap-6">
+              {/* Square avatar */}
+              <div className="flex-shrink-0 w-14 h-14 bg-[var(--foreground)] flex items-center justify-center text-[var(--background)] font-serif text-xl font-semibold">
+                {(blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash").charAt(0)}
               </div>
               <div>
                 <p className="section-label mb-2">Written by</p>
-                <h3 className="font-serif font-semibold text-xl md:text-2xl tracking-wide mb-3">{blog.author}</h3>
-                <p className="text-sm text-[var(--muted)] leading-relaxed max-w-md">
+                <h3 className="font-serif font-semibold text-lg tracking-wide mb-2">{blog.author && blog.author.toLowerCase() !== "anonymous" ? blog.author : "Akash"}</h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed mb-4">
                   A wanderer at heart, capturing moments and sharing stories from the road less traveled.
                 </p>
                 <Link
                   href="/about"
-                  className="inline-flex items-center gap-2 mt-5 text-[0.65rem] tracking-[0.18em] uppercase font-medium text-[var(--foreground)] pb-px border-b border-[var(--foreground)] hover:opacity-50 transition-opacity duration-200"
+                  className="group inline-flex items-center gap-2 text-[0.65rem] tracking-[0.18em] uppercase font-medium text-[var(--foreground)] pb-px border-b border-[var(--foreground)] hover:opacity-50 transition-opacity duration-200"
                 >
-                  Learn more
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  About the author
+                  <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </Link>
@@ -368,53 +322,81 @@ export default async function BlogPage({ params }: PageProps) {
 
         {/* ── RELATED POSTS ── */}
         {relatedBlogs.length > 0 && (
-          <section className="py-14 md:py-20 border-t border-[var(--border)] bg-[var(--background-alt)]">
+          <section className="border-t border-[var(--border)] bg-[var(--background-alt)] py-14 md:py-20">
             <div className="wide-width">
-              <div className="mb-10 md:mb-14">
-                <p className="section-label mb-3">Continue the Journey</p>
-                <h2 className="font-serif font-semibold text-2xl md:text-3xl tracking-wide">More Wanderings</h2>
+              <div className="flex items-end justify-between mb-10 md:mb-14">
+                <div>
+                  <p className="section-label mb-3">Continue the Journey</p>
+                  <h2 className="font-serif font-semibold text-2xl md:text-3xl tracking-wide">More Wanderings</h2>
+                </div>
+                <Link
+                  href="/"
+                  className="group hidden sm:inline-flex items-center gap-2 text-[0.65rem] tracking-[0.18em] uppercase font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors duration-200"
+                >
+                  All stories
+                  <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl">
-                {relatedBlogs.map((relatedBlog) => (
-                  <Link key={relatedBlog.id || relatedBlog.slug} href={`/blog/${relatedBlog.slug}`} className="group block">
-                    <div className="relative aspect-[16/10] overflow-hidden bg-[var(--background)] mb-5">
-                      {relatedBlog.coverImage ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+                {relatedBlogs.map((related, i) => (
+                  <Link key={related.id || related.slug} href={`/blog/${related.slug}`} className="group block">
+                    {/* Image */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--background)] mb-5">
+                      {related.coverImage ? (
                         <Image
-                          src={relatedBlog.coverImage}
-                          alt={relatedBlog.title}
+                          src={related.coverImage}
+                          alt={related.title}
                           fill
-                          className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-[var(--background-section)]">
-                          <span className="font-serif text-4xl font-semibold text-[var(--border)]">
-                            {relatedBlog.title.charAt(0)}
+                          <span className="font-serif font-semibold text-5xl text-[var(--border)]">
+                            {related.title.charAt(0)}
                           </span>
                         </div>
                       )}
+                      {/* Number */}
+                      <div className="absolute top-4 left-4">
+                        <span className="font-serif text-xs font-medium tracking-wider text-white/80 bg-black/30 backdrop-blur-sm px-2 py-1">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Meta */}
                     <div className="flex items-center gap-3 mb-3">
-                      <time className="text-[0.6rem] tracking-[0.1em] text-[var(--muted)]">
-                        {new Date(relatedBlog.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      </time>
+                      {related.tags?.[0] && (
+                        <span className="text-[0.6rem] tracking-[0.15em] uppercase text-[var(--accent)] font-medium">
+                          {related.tags[0]}
+                        </span>
+                      )}
                       <span className="w-px h-3 bg-[var(--border)]" />
-                      <span className="text-[0.6rem] tracking-[0.1em] text-[var(--muted)]">{relatedBlog.readingTime} min read</span>
+                      <time className="text-[0.6rem] tracking-[0.1em] text-[var(--muted)]">
+                        {new Date(related.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </time>
                     </div>
-                    <h3 className="font-serif font-semibold text-lg md:text-xl tracking-wide leading-snug group-hover:opacity-60 transition-opacity duration-200">
-                      {relatedBlog.title}
+
+                    {/* Title */}
+                    <h3 className="font-serif font-semibold text-lg tracking-wide leading-snug group-hover:opacity-60 transition-opacity duration-200">
+                      {related.title}
                     </h3>
                   </Link>
                 ))}
               </div>
 
-              <div className="mt-12 md:mt-16">
+              {/* Mobile "All stories" link */}
+              <div className="mt-10 sm:hidden">
                 <Link
                   href="/"
-                  className="group inline-flex items-center gap-3 text-[0.7rem] tracking-[0.2em] uppercase font-medium text-[var(--foreground)] pb-1 border-b border-[var(--foreground)] hover:opacity-50 transition-opacity duration-300"
+                  className="group inline-flex items-center gap-2 text-[0.65rem] tracking-[0.18em] uppercase font-medium text-[var(--foreground)] pb-px border-b border-[var(--foreground)] hover:opacity-50 transition-opacity"
                 >
                   View All Stories
-                  <svg className="w-3 h-3 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </Link>
@@ -422,6 +404,7 @@ export default async function BlogPage({ params }: PageProps) {
             </div>
           </section>
         )}
+
       </article>
     </>
   );

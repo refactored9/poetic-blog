@@ -40,17 +40,17 @@ export default function Footer() {
         THE SOLO AKASH
       </div>
 
-      <div className="wide-width pt-16 pb-10 lg:pt-20 lg:pb-12 relative z-10">
+      <div className="wide-width pt-12 pb-8 sm:pt-16 sm:pb-10 lg:pt-20 lg:pb-12 relative z-10">
 
         {/* ── TOP SECTION: Newsletter + Back to top + Columns ── */}
-        <div className="flex flex-col lg:flex-row gap-14 lg:gap-20 pb-14 mb-10 border-b border-[var(--border)]">
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-20 pb-10 sm:pb-14 mb-8 sm:mb-10 border-b border-[var(--border)]">
 
           {/* Newsletter */}
           <div className="lg:w-[300px] flex-shrink-0">
-            <h3 className="font-serif font-light text-3xl md:text-4xl tracking-wide leading-tight mb-4">
+            <h3 className="font-serif font-light text-2xl sm:text-3xl md:text-4xl tracking-wide leading-tight mb-3 sm:mb-4">
               Join the Adventure
             </h3>
-            <p className="text-sm text-[var(--muted)] leading-relaxed mb-8 max-w-xs">
+            <p className="text-sm text-[var(--muted)] leading-relaxed mb-6 sm:mb-8 max-w-xs">
               Subscribe to receive exclusive travel stories, hidden gem discoveries, and inspiring reflections from the road.
             </p>
 
