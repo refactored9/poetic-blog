@@ -20,6 +20,9 @@ function getSource(): string {
 
     // Categorize known sources
     if (hostname.includes("google")) return "google";
+    if (hostname.includes("chatgpt.com") || hostname.includes("chat.openai.com")) return "chatgpt";
+    if (hostname.includes("perplexity.ai")) return "perplexity";
+    if (hostname.includes("gemini.google.com") || hostname.includes("bard.google.com")) return "gemini";
     if (hostname.includes("facebook") || hostname.includes("fb.com")) return "facebook";
     if (hostname.includes("twitter") || hostname.includes("t.co")) return "twitter";
     if (hostname.includes("instagram")) return "instagram";

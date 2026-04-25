@@ -394,3 +394,141 @@ export async function getGuideSpecializations(): Promise<string[]> {
     return [];
   }
 }
+
+export interface SeoTrafficWindow {
+  totalVisits: number;
+  uniqueVisitors: number;
+  aiVisits: number;
+  searchVisits: number;
+  directVisits: number;
+  otherVisits: number;
+  aiShare: number;
+  searchShare: number;
+  aiSources: { source: string; count: number }[];
+  searchSources: { source: string; count: number }[];
+}
+
+export interface SeoOverview {
+  generatedAt: string;
+  pollingHintMs: number;
+  periodDays: number;
+  summary: {
+    totalVisitsInRange: number;
+    aiVisitsInRange: number;
+    searchVisitsInRange: number;
+    aiShareInRange: number;
+    searchShareInRange: number;
+  };
+  realtime: {
+    last60Minutes: SeoTrafficWindow;
+    last24Hours: SeoTrafficWindow;
+    today: SeoTrafficWindow;
+  };
+  sources: {
+    top: { source: string; count: number }[];
+    ai: { source: string; count: number }[];
+    search: { source: string; count: number }[];
+  };
+  topPages: { page: string; count: number }[];
+  trend: { date: string; total: number; ai: number; search: number }[];
+  technicalChecks: {
+    name: string;
+    url: string;
+    status: "pass" | "warn" | "fail";
+    httpStatus: number;
+    responseMs: number;
+    detail: string;
+  }[];
+  crawlerActivity: {
+    available: boolean;
+    logPath: string;
+    reason?: string;
+    last24Hours: {
+      totalHits: number;
+      byBot: { bot: string; count: number }[];
+      byStatus: { status: number; count: number }[];
+      topPaths: { path: string; count: number }[];
+    };
+    last60Minutes: {
+      totalHits: number;
+      byBot: { bot: string; count: number }[];
+      byStatus: { status: number; count: number }[];
+      topPaths: { path: string; count: number }[];
+    };
+  };
+  cached?: boolean;
+  error?: string;
+}
+
+export async function getSeoOverview(days = 14): Promise<SeoOverview> {
+  const safeDays = Math.max(1, Math.min(90, days));
+  const fallback: SeoOverview = {
+    generatedAt: new Date().toISOString(),
+    pollingHintMs: 30000,
+    periodDays: safeDays,
+    summary: {
+      totalVisitsInRange: 0,
+      aiVisitsInRange: 0,
+      searchVisitsInRange: 0,
+      aiShareInRange: 0,
+      searchShareInRange: 0,
+    },
+    realtime: {
+      last60Minutes: {
+        totalVisits: 0,
+        uniqueVisitors: 0,
+        aiVisits: 0,
+        searchVisits: 0,
+        directVisits: 0,
+        otherVisits: 0,
+        aiShare: 0,
+        searchShare: 0,
+        aiSources: [],
+        searchSources: [],
+      },
+      last24Hours: {
+        totalVisits: 0,
+        uniqueVisitors: 0,
+        aiVisits: 0,
+        searchVisits: 0,
+        directVisits: 0,
+        otherVisits: 0,
+        aiShare: 0,
+        searchShare: 0,
+        aiSources: [],
+        searchSources: [],
+      },
+      today: {
+        totalVisits: 0,
+        uniqueVisitors: 0,
+        aiVisits: 0,
+        searchVisits: 0,
+        directVisits: 0,
+        otherVisits: 0,
+        aiShare: 0,
+        searchShare: 0,
+        aiSources: [],
+        searchSources: [],
+      },
+    },
+    sources: { top: [], ai: [], search: [] },
+    topPages: [],
+    trend: [],
+    technicalChecks: [],
+    crawlerActivity: {
+      available: false,
+      logPath: "",
+      reason: "crawler log unavailable",
+      last24Hours: { totalHits: 0, byBot: [], byStatus: [], topPaths: [] },
+      last60Minutes: { totalHits: 0, byBot: [], byStatus: [], topPaths: [] },
+    },
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/analytics/seo/overview?days=${safeDays}`);
+    if (!response.ok) return fallback;
+    return response.json();
+  } catch {
+    return fallback;
+  }
+}

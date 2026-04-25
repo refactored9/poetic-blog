@@ -27,6 +27,9 @@ const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
+const DEFAULT_OG_IMAGE = "/opengraph-image";
+
 export const metadata: Metadata = {
   title: {
     default: "The Solo Akash | A Poetic Journey",
@@ -39,13 +42,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com",
+    url: SITE_URL,
     siteName: "The Solo Akash",
     title: "The Solo Akash | A Poetic Journey",
     description: "A quiet corner for thoughts, places, and poetry.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
         alt: "The Solo Akash",
@@ -56,7 +59,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "The Solo Akash | A Poetic Journey",
     description: "A quiet corner for thoughts, places, and poetry.",
-    images: ["/og-image.jpg"],
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,
@@ -70,11 +73,12 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
+    canonical: "./",
     types: {
       "application/rss+xml": "/feed.xml",
     },
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com"),
+  metadataBase: new URL(SITE_URL),
 };
 
 export default function RootLayout({

@@ -14,6 +14,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
+const DEFAULT_OG_IMAGE = "/opengraph-image";
+
 async function getBlog(slug: string): Promise<Blog | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
@@ -42,43 +45,64 @@ async function getRelatedBlogs(currentSlug: string): Promise<Blog[]> {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const blog = await getBlog(slug);
-  if (!blog) return { title: "Not Found" };
+
+  if (!blog) {
+    return {
+      title: "Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const authorName = blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash";
+  const fallbackExcerpt = (blog.content || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
+  const description = blog.excerpt || fallbackExcerpt || `Read ${blog.title} on The Solo Akash.`;
+  const canonicalPath = `/blog/${blog.slug || slug}`;
+  const socialImage = blog.coverImage || DEFAULT_OG_IMAGE;
+
   return {
     title: blog.title,
-    description: blog.excerpt,
-    authors: [{ name: blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash" }],
+    description,
+    authors: [{ name: authorName }],
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
+      url: canonicalPath,
       title: blog.title,
-      description: blog.excerpt,
+      description,
       type: "article",
       publishedTime: blog.publishedAt,
       modifiedTime: blog.updatedAt,
-      authors: [blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash"],
-      images: blog.coverImage
-        ? [{ url: blog.coverImage, width: 1200, height: 630, alt: blog.title }]
-        : [],
+      authors: [authorName],
+      images: [{ url: socialImage, width: 1200, height: 630, alt: blog.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: blog.title,
-      description: blog.excerpt,
-      images: blog.coverImage ? [blog.coverImage] : [],
+      description,
+      images: [socialImage],
     },
   };
 }
 
 function JsonLd({ blog }: { blog: Blog }) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
   const schema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: blog.title,
     description: blog.excerpt,
-    author: { "@type": "Person", name: blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash", url: `${siteUrl}/about` },
+    author: { "@type": "Person", name: blog.author?.toLowerCase() !== "anonymous" ? blog.author : "Akash", url: `${SITE_URL}/about` },
     datePublished: blog.publishedAt,
     dateModified: blog.updatedAt || blog.publishedAt,
     image: blog.coverImage ? { "@type": "ImageObject", url: blog.coverImage } : undefined,
-    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}/blog/${blog.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${blog.slug || ""}` },
     wordCount: blog.content?.split(/\s+/).length || 0,
     keywords: blog.tags?.join(", "),
   };

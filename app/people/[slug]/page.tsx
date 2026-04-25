@@ -9,6 +9,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thesoloakash.com";
+const DEFAULT_OG_IMAGE = "/opengraph-image";
+
 async function getGuide(slug: string): Promise<Guide | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
@@ -27,19 +30,90 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const guide = await getGuide(slug);
 
-  if (!guide) {
-    return { title: "Guide Not Found" };
+  if (!guide || !guide.isPublished) {
+    return {
+      title: "Guide Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
   }
+
+  const description = guide.tagline || guide.bio.slice(0, 160);
+  const canonicalPath = `/people/${guide.slug || slug}`;
+  const socialImage = guide.profileImage || guide.coverImage || DEFAULT_OG_IMAGE;
 
   return {
     title: `${guide.name} | Local Guide`,
-    description: guide.tagline || guide.bio.slice(0, 160),
+    description,
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
+      type: "profile",
+      url: canonicalPath,
       title: guide.name,
-      description: guide.tagline || guide.bio.slice(0, 160),
-      images: guide.profileImage ? [guide.profileImage] : [],
+      description,
+      images: [{ url: socialImage, width: 1200, height: 630, alt: guide.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: guide.name,
+      description,
+      images: [socialImage],
     },
   };
+}
+
+function GuideJsonLd({ guide }: { guide: Guide }) {
+  const profileUrl = `${SITE_URL}/people/${guide.slug || ""}`;
+  const description = guide.tagline || guide.bio.slice(0, 160);
+
+  const profilePageSchema = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    mainEntity: {
+      "@type": "Person",
+      name: guide.name,
+      description,
+      image: guide.profileImage || guide.coverImage || DEFAULT_OG_IMAGE,
+      url: profileUrl,
+      address: guide.location
+        ? {
+          "@type": "PostalAddress",
+          addressLocality: guide.location.city,
+          addressCountry: guide.location.country,
+        }
+        : undefined,
+      knowsAbout: guide.specializations || [],
+    },
+    dateModified: guide.updatedAt || guide.createdAt,
+    url: profileUrl,
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "People", item: `${SITE_URL}/people` },
+      { "@type": "ListItem", position: 3, name: guide.name, item: profileUrl },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+    </>
+  );
 }
 
 export default async function GuidePage({ params }: PageProps) {
@@ -51,7 +125,9 @@ export default async function GuidePage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen py-8 md:py-12">
+    <>
+      <GuideJsonLd guide={guide} />
+      <div className="min-h-screen py-8 md:py-12">
       {/* Hero Section */}
       <header className="wide-width">
         {/* Cover Image */}
@@ -344,6 +420,7 @@ export default async function GuidePage({ params }: PageProps) {
           Back to all guides
         </Link>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

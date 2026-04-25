@@ -1,15 +1,25 @@
-"use client";
+import type { Metadata } from "next";
+import StudioShell from "./StudioShell";
 
-import { StudioAuthProvider, StudioLoginGate } from "./StudioAuth";
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+      "max-snippet": 0,
+      "max-image-preview": "none",
+      "max-video-preview": 0,
+    },
+  },
+};
 
 export default function StudioLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <StudioAuthProvider>
-      <StudioLoginGate>{children}</StudioLoginGate>
-    </StudioAuthProvider>
-  );
+  return <StudioShell>{children}</StudioShell>;
 }

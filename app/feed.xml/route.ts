@@ -75,7 +75,7 @@ export async function GET() {
     <lastBuildDate>${now}</lastBuildDate>
     <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>
     <image>
-      <url>${SITE_URL}/og-image.jpg</url>
+      <url>${SITE_URL}/opengraph-image</url>
       <title>The Solo Akash</title>
       <link>${SITE_URL}</link>
     </image>
